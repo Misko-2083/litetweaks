@@ -6,14 +6,18 @@
 # Date: September 9th, 2014
 # Website: https://www.linuxliteos.com
 #--------------------------------------------------------------------------------------------------------
+
+CACHESIZE=$(du -sh /var/cache/apt/archives/ | awk '{print $1}')
+TRASHCACHESIZE=$(du -sh /home/*/.local/share/Trash/ | awk '{print $1}')
+THUMBCACHESIZE=$(du -sh /home/*/.thumbnails/ | awk '{print $1}')
 ic="/usr/share/icons/zenity-llcc.png"
 
 selection=$(zenity --window-icon="$ic" --list --checklist --width=890 --height=400 --column="Select" --column="Name" --column="Category" --column="Status" \
  --column="Description" --text='Select the task you wish to perform, then click the Clean button. Sort Categories by clicking on the column.\n\nThere are 2 levels of Status:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform.' --title="Lite Cleaner" --ok-label="Clean" --cancel-label="Quit" \
-TRUE "Clean package cache" "Packages" "Safe" "Clean downloaded .deb files from your apt cache" \
+TRUE "Clean package cache" "Packages" "Safe" "You can currently remove $CACHESIZE worth of files from your apt cache" \
 FALSE "Autoremove packages      " "Packages" "Safe" "Remove packages automatically installed for programs that are no longer present" \
-FALSE "Clear thumbnail cache" "Images" "Safe" "Delete thumbnail files created when viewing images" \
-FALSE "Empty all Trash Bins" "Home" "Safe" "Empty the Trash Bins for all users" \
+FALSE "Clear thumbnail cache" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from all users thumbnail caches" \
+FALSE "Empty all Trash Bins" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from all users Trash bins" \
 FALSE "Remove old kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
 
 # Exec scripts
