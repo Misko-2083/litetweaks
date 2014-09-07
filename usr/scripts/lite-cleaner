@@ -1,0 +1,44 @@
+#! /bin/bash
+#--------------------------------------------------------------------------------------------------------
+# Name: Linux Lite Cleaner
+# Description: A GUI tool to easily clean your Linux Lite system.
+# Authors: Misko_2083, Jerry Bezencon
+# Date: September 9th, 2014
+# Website: https://www.linuxliteos.com
+#--------------------------------------------------------------------------------------------------------
+ic="/usr/share/icons/zenity-llcc.png"
+
+selection=$(zenity --window-icon="$ic" --list --checklist --width=890 --height=400 --column="Select" --column="Name" --column="Category" --column="Status" \
+ --column="Description" --text='Select the task you wish to perform, then click the Clean button. Sort Categories by clicking on the column.\n\nThere are 2 levels of Status:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform.' --title="Lite Cleaner" --ok-label="Clean" --cancel-label="Quit" \
+TRUE "Clean package cache" "Packages" "Safe" "Clean downloaded .deb files from your apt cache" \
+FALSE "Autoremove packages      " "Packages" "Safe" "Remove packages automatically installed for programs that are no longer present" \
+FALSE "Clear thumbnail cache" "Images" "Safe" "Delete thumbnail files created when viewing images" \
+FALSE "Empty all Trash Bins" "Home" "Safe" "Empty the Trash Bins for all users" \
+FALSE "Remove old kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
+
+# Exec scripts
+
+echo $selection | grep "Clean package cache" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/aptgetclean 2>/dev/null
+fi
+
+echo $selection | grep "Autoremove packages" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/autoremovepkg 2>/dev/null
+fi
+
+echo $selection | grep "Clear thumbnail cache" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/thumbnails 2>/dev/null
+fi
+
+echo $selection | grep "Empty all Trash Bins" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/emptytrash 2>/dev/null
+fi
+
+echo $selection | grep "Remove old kernels" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/remkernels 2>/dev/null
+fi
