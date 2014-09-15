@@ -35,6 +35,11 @@ if [ $? = 0 ];then
 /usr/scripts/clean/autoremovepkg 2>/dev/null
 fi
 
+echo $selection | grep "Clean Firefox" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/firefox 2>/dev/null
+fi
+
 echo $selection | grep "Clear thumbnail cache" > /dev/null
 if [ $? = 0 ];then
 /usr/scripts/clean/thumbnails 2>/dev/null
