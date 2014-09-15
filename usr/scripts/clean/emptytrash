@@ -5,16 +5,14 @@
 # Website: https://www.linuxliteos.com
 #-----------------------------------------------------------
 
-TRASHCACHESIZE=$(du -sh /home/*/.local/share/Trash/ | awk '{print $1}')
+TRASHCACHESIZE=$(du -sh $HOME/.local/share/Trash/ | awk '{print $1}')
 
 # Main window dialogue.
- INSTALLER_TITLE="Empty all Trash Bins
+ INSTALLER_TITLE="Empty Trash Bin
 -----------------------------------------------------------------------------------------------------------------------------------
-This will process will empty the Trash bins of <b>all</b> users with an account
-on this computer. Before proceeding, ensure that this something other users
-have consented to first.
+This will process will empty your Trash bin.
 
-The current total size of all Trash bins is <b>$TRASHCACHESIZE</b>
+The current total size of your Trash bin is <b>$TRASHCACHESIZE</b>
 
 When you click on Yes, this window will close and the process will begin.
 
@@ -23,12 +21,12 @@ Click on Yes to continue or No to cancel the cleaning process.\nWould you like t
 
 # Call the zenity window icon location.
  INSTALL_ICON="/usr/share/icons/zenity-llcc.png"
- APPNAME="Empty all Trash Bins"
+ APPNAME="Empty Trash Bin"
         
         zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
 
                 if [ "$?" -eq "0" ]; then
-                        gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "stdbuf -oL /bin/bash \-c '(sudo rm -rf /home/*/.local/share/Trash/files/*)" | zenity --progress --title="Cleaning $APPNAME" --window-icon="${INSTALL_ICON}" --text="Please wait whilst all Trash bins are emptied..." --pulsate --width=400 --auto-close --auto-kill
+                        rm -rf $HOME/.local/share/Trash/files/* | zenity --progress --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="Please wait whilst your Trash bin is emptied..." --pulsate --width=400 --auto-close --auto-kill
 
 
                                 if [ "${PIPESTATUS[0]}" -ne "0" ]; then

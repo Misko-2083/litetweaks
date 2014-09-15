@@ -8,8 +8,8 @@
 #--------------------------------------------------------------------------------------------------------
 
 APTCACHESIZE=$(du -sh /var/cache/apt/archives/ | awk '{print $1}')
-TRASHCACHESIZE=$(du -sh /home/*/.local/share/Trash/ | awk '{print $1}')
-THUMBCACHESIZE=$(du -sh /home/*/.thumbnails/ | awk '{print $1}')
+TRASHCACHESIZE=$(du -sh $HOME/.local/share/Trash/ | awk '{print $1}')
+THUMBCACHESIZE=$(du -sh $HOME/.thumbnails/ | awk '{print $1}')
 FFCACHESIZE=$(du -sh $HOME/.cache/mozilla/ | awk '{print $1}')
 ic="/usr/share/icons/zenity-llcc.png"
 
@@ -18,8 +18,8 @@ selection=$(zenity --window-icon="$ic" --list --checklist --width=780 --height=3
 TRUE "Clean package cache" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your apt cache" \
 FALSE "Autoremove packages      " "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
 FALSE "Clean Firefox" "Internet" "Safe" "You can currently remove $FFCACHESIZE from your Firefox cache" \
-FALSE "Clear thumbnail cache" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from all users thumbnail caches" \
-FALSE "Empty all Trash Bins" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from all users Trash bins" \
+FALSE "Clear thumbnail cache" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from your thumbnail cache" \
+FALSE "Empty all Trash Bins" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from your Trash bin" \
 FALSE "Locate large files" "System" "Caution" "Find files on your system larger than 50MB" )
 # [Future feature, DO NOT enable] FALSE "Remove old kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
 

@@ -10,11 +10,9 @@ FFCACHESIZE=$(du -sh $HOME/.cache/mozilla/ | awk '{print $1}')
 # Main window dialogue.
  INSTALLER_TITLE="Firefox Web Browser Cleaner
 -------------------------------------------------------------------------------------------------------------
-This will process will purge Firefox of .
+This will process will purge Firefox of <b>$FFCACHESIZE</b> worth of files.
 
 Please make sure Firefox is closed <b>before</b> you proceed.
-
-The total size of your Firefox cache is <b>$FFCACHESIZE</b>
 
 When you click on Yes, this window will close and the process will begin.
 

@@ -5,12 +5,12 @@
 # Website: https://www.linuxliteos.com
 #-----------------------------------------------------------
 
-THUMBCACHESIZE=$(du -sh /home/*/.thumbnails/ | awk '{print $1}')
+THUMBCACHESIZE=$(du -sh $HOME/.thumbnails/ | awk '{print $1}')
 
 # Main window dialogue.
- INSTALLER_TITLE="Delete Thumbnail Caches
+ INSTALLER_TITLE="Delete Thumbnail Cache
 ------------------------------------------------------------------------------------------------------------
-This will delete thumbnail caches from <b>all</b> users home folders.
+This will empty your thumbnail cache.
 
 You currently have <b>$THUMBCACHESIZE</b> of space that can be cleaned.
 
@@ -21,12 +21,12 @@ Click on Yes to continue or No to cancel the cleaning process.\nWould you like t
 
 # Call the zenity window icon location.
  INSTALL_ICON="/usr/share/icons/zenity-llcc.png"
- APPNAME="Delete Thumbnail Caches"
+ APPNAME="Delete Thumbnail Cache"
         
         zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
 
                 if [ "$?" -eq "0" ]; then
-                        gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "stdbuf -oL /bin/bash \-c '(sudo rm -rf /home/*/.thumbnails/*)" | zenity --progress --title="Deleting Thumbnail Caches" --window-icon="${INSTALL_ICON}" --text="Please wait whilst thumbnail caches are deleted..." --pulsate --width=400 --auto-close --auto-kill
+                        rm -rf $HOME/.thumbnails/* | zenity --progress --title="Deleting Thumbnail Cache" --window-icon="${INSTALL_ICON}" --text="Please wait whilst your thumbnail cache is deleted..." --pulsate --width=400 --auto-close --auto-kill
 
 
                                 if [ "${PIPESTATUS[0]}" -ne "0" ]; then
