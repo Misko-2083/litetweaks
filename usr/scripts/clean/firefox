@@ -5,7 +5,7 @@
 # Website: https://www.linuxliteos.com
 #-----------------------------------------------------------
 
-FFCACHESIZE=$(du -sh /home/*/.cache/mozilla/ | awk '{print $1}')
+FFCACHESIZE=$(du -sh $HOME/.cache/mozilla/ | awk '{print $1}')
 
 # Main window dialogue.
  INSTALLER_TITLE="Firefox Web Browser Cleaner

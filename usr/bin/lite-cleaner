@@ -10,7 +10,7 @@
 APTCACHESIZE=$(du -sh /var/cache/apt/archives/ | awk '{print $1}')
 TRASHCACHESIZE=$(du -sh /home/*/.local/share/Trash/ | awk '{print $1}')
 THUMBCACHESIZE=$(du -sh /home/*/.thumbnails/ | awk '{print $1}')
-FFCACHESIZE=$(du -sh /home/*/.cache/mozilla/ | awk '{print $1}')
+FFCACHESIZE=$(du -sh $HOME/.cache/mozilla/ | awk '{print $1}')
 ic="/usr/share/icons/zenity-llcc.png"
 
 selection=$(zenity --window-icon="$ic" --list --checklist --width=780 --height=380 --column="Select" --column="Name" --column="Category" --column="Status" \
