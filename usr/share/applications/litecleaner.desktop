@@ -1,0 +1,12 @@
+[Desktop Entry]
+Categories=XFCE;GTK;System;DesktopSettings;X-XFCE-SettingsDialog;X-XFCE-SystemSettings;
+Encoding=UTF-8
+Exec=lite-cleaner
+Icon=litecleaner
+StartupNotify=true
+Terminal=false
+Type=Application
+Name=Lite Cleaner
+Comment=Clean your system
+GenericName=Lite Cleaner
+X-XfceSettingsName=Lite Cleaner

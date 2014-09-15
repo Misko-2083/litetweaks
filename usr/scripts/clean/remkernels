@@ -7,13 +7,12 @@
 
 # Main window dialogue.
  INSTALLER_TITLE="Remove Unneeded Packages
-------------------------------------------------------------------------------------------------------------
-This will remove packages automatically installed for programs that are
-no longer present.
+-----------------------------------------------------------------------------------------------------------------------------------
+This will remove packages automatically installed for programs that are no longer present.
 
 When you click on Yes, this window will close and the process will begin.
 
-------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------
 Click on Yes to continue or No to cancel the cleaning process.\nWould you like to continue?"
 
 # Call the zenity window icon location.
@@ -23,7 +22,10 @@ Click on Yes to continue or No to cancel the cleaning process.\nWould you like t
         zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
 
                 if [ "$?" -eq "0" ]; then
-                        gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "sudo apt-get autoremove" | zenity --progress --title="Cleaning $APPNAME" --window-icon="${INSTALL_ICON}" --text="Please wait whilst unneeded packages are removed..." --pulsate --width=400 --auto-close --auto-kill
+x=$( gksudo -g --message 'To update package lists your password is required. Enter your password, or press Cancel.' "stdbuf -oL /bin/bash \-c '(sudo sh /usr/scripts/clean/kernels ) 2>&1 | tee /var/log/kernelremoval.log'" |
+stdbuf -oL sed -n -e '/\[*$/ s/^/# /p' -e '/\*$/ s/^/# /p'|
+zenity --progress --title="Updating" --pulsate \
+--width=600 --auto-close )
 
 
                                 if [ "${PIPESTATUS[0]}" -ne "0" ]; then
@@ -39,12 +41,12 @@ Click on Yes to continue or No to cancel the cleaning process.\nWould you like t
                 fi
 
 
-PROCEED=$(zenity --info --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --width=270 --text="The cleaner has finished."; echo $?)
+PROCEED=$(zenity --question --title="$APPNAME Updates" --window-icon=/usr/share/icons/zenity-llcc.png --text="Updates have finished installing.\n\nWould you like to view the $APPNAME Updates log?"; echo $?)
 if [ ${PROCEED} -eq 1 ]; then
-	zenity --info --title="$APPNAME Cleaner" --window-icon="${INSTALL_ICON}" --text="$APPNAME Clean Complete."
+	zenity --info --title="$APPNAME Updates" --window-icon="${INSTALL_ICON}" --text="$APPNAME Updates Complete."
 	exit;
 else
-	exit
+	leafpad /var/log/kernelremoval.log
 fi
 
 exit 0

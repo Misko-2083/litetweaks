@@ -5,25 +5,30 @@
 # Website: https://www.linuxliteos.com
 #-----------------------------------------------------------
 
+TRASHCACHESIZE=$(du -sh /home/*/.local/share/Trash/ | awk '{print $1}')
+
 # Main window dialogue.
- INSTALLER_TITLE="Remove Unneeded Packages
-------------------------------------------------------------------------------------------------------------
-This will remove packages automatically installed for programs that are
-no longer present.
+ INSTALLER_TITLE="Empty all Trash Bins
+-----------------------------------------------------------------------------------------------------------------------------------
+This will process will empty the Trash bins of <b>all</b> users with an account
+on this computer. Before proceeding, ensure that this something other users
+have consented to first.
+
+The current total size of all Trash bins is <b>$TRASHCACHESIZE</b>
 
 When you click on Yes, this window will close and the process will begin.
 
-------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------
 Click on Yes to continue or No to cancel the cleaning process.\nWould you like to continue?"
 
 # Call the zenity window icon location.
  INSTALL_ICON="/usr/share/icons/zenity-llcc.png"
- APPNAME="Remove Unneeded Packages"
+ APPNAME="Empty all Trash Bins"
         
         zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
 
                 if [ "$?" -eq "0" ]; then
-                        gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "sudo apt-get autoremove" | zenity --progress --title="Cleaning $APPNAME" --window-icon="${INSTALL_ICON}" --text="Please wait whilst unneeded packages are removed..." --pulsate --width=400 --auto-close --auto-kill
+                        gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "stdbuf -oL /bin/bash \-c '(sudo rm -rf /home/*/.local/share/Trash/files/*)" | zenity --progress --title="Cleaning $APPNAME" --window-icon="${INSTALL_ICON}" --text="Please wait whilst all Trash bins are emptied..." --pulsate --width=400 --auto-close --auto-kill
 
 
                                 if [ "${PIPESTATUS[0]}" -ne "0" ]; then
@@ -41,7 +46,7 @@ Click on Yes to continue or No to cancel the cleaning process.\nWould you like t
 
 PROCEED=$(zenity --info --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --width=270 --text="The cleaner has finished."; echo $?)
 if [ ${PROCEED} -eq 1 ]; then
-	zenity --info --title="$APPNAME Cleaner" --window-icon="${INSTALL_ICON}" --text="$APPNAME Clean Complete."
+	zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Clean Complete."
 	exit;
 else
 	exit

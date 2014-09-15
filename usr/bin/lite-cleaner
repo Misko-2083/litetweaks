@@ -1,0 +1,57 @@
+#! /bin/bash
+#--------------------------------------------------------------------------------------------------------
+# Name: Linux Lite Cleaner
+# Description: A GUI tool to easily clean your Linux Lite system.
+# Authors: Misko_2083, Jerry Bezencon
+# Date: September 16th, 2014
+# Website: https://www.linuxliteos.com
+#--------------------------------------------------------------------------------------------------------
+
+APTCACHESIZE=$(du -sh /var/cache/apt/archives/ | awk '{print $1}')
+TRASHCACHESIZE=$(du -sh /home/*/.local/share/Trash/ | awk '{print $1}')
+THUMBCACHESIZE=$(du -sh /home/*/.thumbnails/ | awk '{print $1}')
+FFCACHESIZE=$(du -sh /home/*/.cache/mozilla/ | awk '{print $1}')
+ic="/usr/share/icons/zenity-llcc.png"
+
+selection=$(zenity --window-icon="$ic" --list --checklist --width=780 --height=380 --column="Select" --column="Name" --column="Category" --column="Status" \
+ --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform (password required for each task).' --title="Lite Cleaner" --ok-label="Begin" --cancel-label="Quit" \
+TRUE "Clean package cache" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your apt cache" \
+FALSE "Autoremove packages      " "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
+FALSE "Clean Firefox" "Internet" "Safe" "You can currently remove $FFCACHESIZE from your Firefox cache" \
+FALSE "Clear thumbnail cache" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from all users thumbnail caches" \
+FALSE "Empty all Trash Bins" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from all users Trash bins" \
+FALSE "Locate large files" "System" "Caution" "Find files on your system larger than 50MB" )
+# [Future feature, DO NOT enable] FALSE "Remove old kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
+
+# Exec scripts
+
+echo $selection | grep "Clean package cache" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/aptgetclean 2>/dev/null
+fi
+
+echo $selection | grep "Autoremove packages" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/autoremovepkg 2>/dev/null
+fi
+
+echo $selection | grep "Clear thumbnail cache" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/thumbnails 2>/dev/null
+fi
+
+echo $selection | grep "Empty all Trash Bins" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/emptytrash 2>/dev/null
+fi
+
+echo $selection | grep "Locate large files" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/files50 2>/dev/null
+fi
+
+# [Future feature, DO NOT enable]
+# echo $selection | grep "Remove old kernels" > /dev/null
+# if [ $? = 0 ];then
+# /usr/scripts/clean/remkernels 2>/dev/null
+# fi

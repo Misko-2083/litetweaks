@@ -1,0 +1,54 @@
+#!/bin/bash
+#-----------------------------------------------------------
+# Description: Linux Lite Cleaner Dialogue
+# Author: Jerry Bezencon 2014
+# Website: https://www.linuxliteos.com
+#-----------------------------------------------------------
+
+# Main window dialogue.
+ INSTALLER_TITLE="Find files larger than 50MB
+---------------------------------------------------------------------------------------------------------------------------
+This will find and list all files on your system 50MB and larger.
+
+<b>Do not remove a file from your system unless you know what you are doing.
+This is not a removal tool, it is provided as information only.</b>
+
+When you click on Yes, this window will close and the process will begin.
+
+---------------------------------------------------------------------------------------------------------------------------
+Click on Yes to continue or No to cancel the system scan.\nWould you like to continue?"
+
+# Call the zenity window icon location.
+ INSTALL_ICON="/usr/share/icons/zenity-llcc.png"
+ APPNAME="Find files larger than 50MB"
+        
+        zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
+
+                if [ "$?" -eq "0" ]; then
+
+x=$( gksudo -g --message 'To run this scanner your password is required. Enter your password, or press Cancel.' "stdbuf -oL /bin/bash \-c '(sudo find / -size +50M -exec du -mh {} + | sort -h -r ) 2>&1 | tee /var/log/findfiles50.log'" |
+stdbuf -oL sed -n -e '/\[*$/ s/^/# /p' -e '/\*$/ s/^/# /p'|
+zenity --progress --title="Please wait whilst your system is scanned..." --pulsate \
+--width=600 --auto-close )
+
+                                if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        
+                                        zenity --error \
+                                        --title="Error" --text="$APPNAME has failed."
+                                        exit 0
+                                fi
+
+                else
+
+                                        exit 0
+                fi
+
+PROCEED=$(zenity --question --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --text="Scan complete.\n\nWould you like to view the results?"; echo $?)
+if [ ${PROCEED} -eq 1 ]; then
+	zenity --info --title="Scan Complete" --window-icon="${INSTALL_ICON}" --text="Click OK to close."
+	exit;
+else
+	leafpad /var/log/findfiles50.log
+fi
+
+exit 0
