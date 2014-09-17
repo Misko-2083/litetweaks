@@ -5,25 +5,28 @@
 # Website: https://www.linuxliteos.com
 #-----------------------------------------------------------
 
+FFCACHESIZE=$(du -sh $HOME/.cache/google-chrome/ | awk '{print $1}')
+
 # Main window dialogue.
- INSTALLER_TITLE="Remove Unneeded Packages
-------------------------------------------------------------------------------------------------------------
-This will remove packages automatically installed for programs that are
-no longer present.
+ INSTALLER_TITLE="Chrome Web Browser Cleaner
+-------------------------------------------------------------------------------------------------------------
+This will process will purge Chrome of <b>$FFCACHESIZE</b> worth of files.
+
+Please make sure Chrome is closed <b>before</b> you proceed.
 
 When you click on Yes, this window will close and the process will begin.
 
-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
 Click on Yes to continue or No to cancel the cleaning process.\nWould you like to continue?"
 
 # Call the zenity window icon location.
  INSTALL_ICON="/usr/share/icons/zenity-llcc.png"
- APPNAME="Remove Unneeded Packages"
+ APPNAME="Chrome Web Browser Cleaner"
         
         zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
 
                 if [ "$?" -eq "0" ]; then
-                        gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "sudo apt-get autoremove -y" | zenity --progress --title="Cleaning $APPNAME" --window-icon="${INSTALL_ICON}" --text="Please wait whilst unneeded packages are removed..." --pulsate --width=400 --auto-close --auto-kill
+                        rm -rf $HOME/.cache/google-chrome/ | zenity --progress --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="Please wait whilst Chrome is being cleaned..." --pulsate --width=400 --auto-close --auto-kill
 
 
                                 if [ "${PIPESTATUS[0]}" -ne "0" ]; then
@@ -41,7 +44,7 @@ Click on Yes to continue or No to cancel the cleaning process.\nWould you like t
 
 PROCEED=$(zenity --info --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --width=270 --text="The cleaner has finished."; echo $?)
 if [ ${PROCEED} -eq 1 ]; then
-	zenity --info --title="$APPNAME Cleaner" --window-icon="${INSTALL_ICON}" --text="$APPNAME Clean Complete."
+	zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
 	exit;
 else
 	exit
