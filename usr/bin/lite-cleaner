@@ -23,7 +23,7 @@ FALSE "Clean Firefox" "Internet" "Safe" "You can currently remove $FFCACHESIZE f
 FALSE "Clean Chrome" "Internet" "Safe" "You can currently remove $GCCACHESIZE from your Chrome cache" \
 FALSE "Clean Chromium" "Internet" "Safe" "You can currently remove $CHRCACHESIZE from your Chromium cache" \
 FALSE "Clear thumbnail cache" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from your thumbnail cache" \
-FALSE "Empty all Trash Bins" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from your Trash bin" \
+FALSE "Empty your Trash Bin" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from your Trash bin" \
 FALSE "Locate large files" "System" "Caution" "Find files on your system larger than 50MB" )
 # [Future feature, DO NOT enable] FALSE "Remove old kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
 
@@ -59,7 +59,7 @@ if [ $? = 0 ];then
 /usr/scripts/clean/thumbnails 2>/dev/null
 fi
 
-echo $selection | grep "Empty all Trash Bins" > /dev/null
+echo $selection | grep "Empty your Trash Bin" > /dev/null
 if [ $? = 0 ];then
 /usr/scripts/clean/emptytrash 2>/dev/null
 fi
