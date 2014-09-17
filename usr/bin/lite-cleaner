@@ -16,7 +16,7 @@ CHRCACHESIZE=$(du -sh $HOME/.cache/chromium/ | awk '{print $1}')
 ic="/usr/share/icons/zenity-llcc.png"
 
 selection=$(zenity --window-icon="$ic" --list --checklist --width=780 --height=420 --column="Select" --column="Name" --column="Category" --column="Status" \
- --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform (password required for each task).' --title="Lite Cleaner" --ok-label="Begin" --cancel-label="Quit" \
+ --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform (password required for some tasks).' --title="Lite Cleaner" --ok-label="Begin" --cancel-label="Quit" \
 TRUE "Clean package cache" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your apt cache" \
 FALSE "Autoremove packages      " "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
 FALSE "Clean Firefox" "Internet" "Safe" "You can currently remove $FFCACHESIZE from your Firefox cache" \
