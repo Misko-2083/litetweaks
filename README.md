@@ -1,6 +1,5 @@
-####################################
-# Linux Lite Cleaner #
-####################################
+litecleaner 
+================
 
 Authors - Misko_2083, Jerry Bezencon
 
