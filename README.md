@@ -4,4 +4,4 @@
 
 Authors - Misko_2083, Jerry Bezencon
 
-![](https://i.imgur.com/04x3fox.png)
+![](https://i.imgur.com/cr2sFbV.png)
