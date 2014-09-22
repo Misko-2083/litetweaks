@@ -20,7 +20,7 @@ When you click on Yes, this window will close and the process will begin.
 Click on Yes to continue or No to cancel the cleaning process.\nWould you like to continue?"
 
 # Call the zenity window icon location.
- INSTALL_ICON="/usr/share/icons/zenity-llcc.png"
+ INSTALL_ICON="/usr/share/pixmaps/litecleaner.png"
  APPNAME="Delete Thumbnail Cache"
         
         zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
