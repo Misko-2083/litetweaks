@@ -8,42 +8,64 @@
 #--------------------------------------------------------------------------------------------------------
 
 APTCACHESIZE=$(du -sh /var/cache/apt/archives/ | awk '{print $1}')
-TRASHCACHESIZE=$(du -sh $HOME/.local/share/Trash/ | awk '{print $1}')
-THUMBCACHESIZE=$(du -sh $HOME/.thumbnails/ | awk '{print $1}')
 
+# Set the dialogue window icon
 ic="/usr/share/pixmaps/litecleaner.png"
 
-if [  -d  "$HOME/.cache/mozilla/"  ]; then
-	FFCACHESIZE=$(du -sh $HOME/.cache/mozilla/ | awk '{print $1}')
+# Check if firefox cache exists
+if [  -d  "$HOME/.cache/mozilla/" ];then
+	FFCACHESIZE=$(du -sh "$HOME/.cache/mozilla/"| awk '{print $1}')
+	firefox=("FALSE"  "Clean Firefox" "Internet" "Safe" "You can currently remove $FFCACHESIZE from your Firefox cache" )
 else
-FFCACHESIZE=$(echo nothing)
+        firefox=( )
 fi
 
-if [  -d  "$HOME/.cache/google-chrome/" ]; then
+# Check if the google-chrome cache exists
+if [ -d  "$HOME/.cache/google-chrome/" ]; then
 	GCCACHESIZE=$(du -sh $HOME/.cache/google-chrome/ | awk '{print $1}' )
-else
-GCCACHESIZE=$(echo nothing)
+	chrome=("FALSE" "Clean Chrome" "Internet" "Safe" "You can currently remove $GCCACHESIZE from your Chrome cache" )
+	else
+        chrome=( ) 
 fi
 
+# Check if the chromium cache exists
 if [  -d  "$HOME/.cache/chromium/" ]; then
-CHRCACHESIZE=$(du -sh $HOME/.cache/chromium/ | awk '{print $1}')
+	CHRCACHESIZE=$(du -sh $HOME/.cache/chromium/ | awk '{print $1}')
+	chromium=("FALSE" "Clean Chromium" "Internet" "Safe" "You can currently remove $CHRCACHESIZE from your Chromium cache" )
 else
-CHRCACHESIZE=$(echo nothing)
+         chromium=( ) 
 fi
 
+# Check if any thumbnails exist
+if [  "$(ls -A $HOME/.thumbnails/)" ]; then
+        THUMBCACHESIZE=$(du -sh $HOME/.thumbnails/ | awk '{print $1}')
+	thumbn=("FALSE" "Clean thumbnail cache" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from your thumbnail cache" )
+else
+        thumbn=( ) 
+fi
+
+# Check if the Trash is empty
+if [  "$(ls -A $HOME/.local/share/Trash/files/)" ]; then
+        TRASHCACHESIZE=$(du -sh $HOME/.local/share/Trash/ | awk '{print $1}')
+	trash=("FALSE" "Empty your Trash Bin" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from your Trash bin" )
+else
+        trash=( ) 
+fi
+
+# Main zenity dialogue window
 selection=$(zenity --window-icon="$ic" --list --checklist --width=780 --height=420 --column="Select" --column="Name" --column="Category" --column="Status" \
  --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform (password required for some tasks).' --title="Lite Cleaner" --ok-label="Begin" --cancel-label="Quit" \
-TRUE "Clean package cache" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your apt cache" \
-FALSE "Autoremove packages      " "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
-FALSE "Clean Firefox" "Internet" "Safe" "You can currently remove $FFCACHESIZE from your Firefox cache" \
-FALSE "Clean Chrome" "Internet" "Safe" "You can currently remove $GCCACHESIZE from your Chrome cache" \
-FALSE "Clean Chromium" "Internet" "Safe" "You can currently remove $CHRCACHESIZE from your Chromium cache" \
-FALSE "Clear thumbnail cache" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from your thumbnail cache" \
-FALSE "Empty your Trash Bin" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from your Trash bin" \
+TRUE "Clean package cache" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your package cache" \
+FALSE "Autoremove packages" "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
+"${firefox[@]}" \
+"${chrome[@]}" \
+"${chromium[@]}" \
+"${thumbn[@]}" \
+"${trash[@]}" \
 FALSE "Locate large files" "System" "Caution" "Find files on your system larger than 50MB" )
 # [Future feature, DO NOT enable] FALSE "Remove old kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
 
-# Exec scripts
+# Execute scripts
 
 echo $selection | grep "Clean package cache" > /dev/null
 if [ $? = 0 ];then
