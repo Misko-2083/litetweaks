@@ -65,6 +65,18 @@ FALSE "Autoremove packages" "Packages" "Safe" "Remove packages installed for pro
 FALSE "Locate large files" "System" "Caution" "Find files on your system larger than 50MB" \
 FALSE "Remove additional kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
 
+# If Quit is clicked then exit
+if [ "${PIPESTATUS[0]}" -ne "0" ]; then 
+      exit 0
+fi
+
+# check if anything is selected
+echo $selection | grep \n
+if [ "${PIPESTATUS[1]}" -ne "0" ]; then
+    zenity --info --title='Cleaner' --text='No option was selected.'
+    exit 0
+fi
+
 # Execute scripts
 
 echo $selection | grep "Clean package cache" > /dev/null
