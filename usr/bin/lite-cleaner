@@ -53,7 +53,7 @@ else
 fi
 
 # Main zenity dialogue window
-selection=$(zenity --window-icon="$ic" --list --checklist --width=780 --height=420 --column="Select" --column="Name" --column="Category" --column="Status" \
+selection=$(zenity --window-icon="$ic" --list --checklist --width=800 --height=400 --column="Select" --column="Name" --column="Category" --column="Status" \
  --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform (password required for some tasks).' --title="Lite Cleaner" --ok-label="Begin" --cancel-label="Quit" \
 TRUE "Clean package cache" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your package cache" \
 FALSE "Autoremove packages" "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
@@ -62,8 +62,8 @@ FALSE "Autoremove packages" "Packages" "Safe" "Remove packages installed for pro
 "${chromium[@]}" \
 "${thumbn[@]}" \
 "${trash[@]}" \
-FALSE "Locate large files" "System" "Caution" "Find files on your system larger than 50MB" )
-# [Future feature, DO NOT enable] FALSE "Remove old kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
+FALSE "Locate large files" "System" "Caution" "Find files on your system larger than 50MB" \
+FALSE "Remove additional kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
 
 # Execute scripts
 
@@ -107,8 +107,7 @@ if [ $? = 0 ];then
 /usr/scripts/clean/files50 2>/dev/null
 fi
 
-# [Future feature, DO NOT enable]
-# echo $selection | grep "Remove old kernels" > /dev/null
-# if [ $? = 0 ];then
-# /usr/scripts/clean/remkernels 2>/dev/null
-# fi
+echo $selection | grep "Remove additional kernels" > /dev/null
+if [ $? = 0 ];then
+/usr/scripts/clean/remkernels 2>/dev/null
+fi

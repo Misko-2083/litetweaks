@@ -1,7 +1,7 @@
 #!/bin/bash
 #-----------------------------------------------------------
 # Description: Linux Lite Cleaner Dialogue
-# Author: Misko_2083 Jerry Bezencon 2014
+# Authors: Misko_2083, Jerry Bezencon 2014
 # Website: https://www.linuxliteos.com
 #-----------------------------------------------------------
 
@@ -18,7 +18,7 @@ OLDKERNELS=$(dpkg -l|awk '{print $2}'|grep -E $LINUXPKG |grep -vE $METALINUXPKG|
 # check if there are old kernels
 echo $OLDKERNELS | grep linux*
 if [ "${PIPESTATUS[1]}" -ne "0" ]; then
-    zenity --info --text="No old kernels found"
+    zenity --info --title="Results" --text="No additional kernels found"
     exit 0
 fi
 
@@ -32,14 +32,14 @@ Be sure to select both the header and the image for each version of
 the kernel that you wish to remove.
 
 When you click on Remove, this window will close and the process will begin.
-Click on Cancel to cancel the cleaning process."
+Click on Cancel to halt the cleaning process."
 
 # Call the zenity window icon location.
 ic="/usr/share/icons/zenity-llcc.png"
-APPNAME="Old Kernel Cleaner"
+APPNAME="Kernel Cleaner"
 
 # Call the dialog. Don't change the separator here!
-okernel=$(zenity --window-icon="$ic" --list --checklist --separator=" " --width=600 --height=400   --column="Select" --column="Old Kernel" \
+okernel=$(zenity --window-icon="$ic" --list --checklist --separator=" " --width=500 --height=380   --column="Select" --column="Kernel List" \
 --text="${DIALOG_TEXT}" --title="$APPNAME" --ok-label="Remove" --cancel-label="Cancel" "${zen[@]}" ) 
 
 # If canel is clicked then exit
@@ -55,9 +55,9 @@ if [ "${PIPESTATUS[1]}" -ne "0" ]; then
 fi
 
 
-zenity --question --title="Question"  --text="Do you want to proceed?\nYou are about to remove\n$okernel"
+zenity --question --title="$APPNAME"  --text="Do you want to proceed? You are about to remove:\n$okernel"
  if [ "$?" -eq "0" ]; then
-      gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "sudo apt-get purge -y $okernel" | zenity --progress --title='Removing Old Kernels'  --text='Removing...' --no-cancel --pulsate --width=400 --auto-close --auto-kill
+      gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "sudo apt-get purge -y $okernel" | zenity --progress --title='Removing Additional Kernels'  --text='Removing...' --no-cancel --pulsate --width=400 --auto-close --auto-kill
 
                         if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         
@@ -74,7 +74,7 @@ zenity --question --title="Question"  --text="Do you want to proceed?\nYou are a
 
 PROCEED=$(zenity --info --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --width=270 --text="The cleaner has finished."; echo $?)
 if [ ${PROCEED} -eq 1 ]; then
-	zenity --info --title="$APPNAME Cleaner" --window-icon="${INSTALL_ICON}" --text="$APPNAME Clean Complete."
+	zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
 	exit;
 else
 	exit
