@@ -5,17 +5,17 @@
 # Website: https://www.linuxliteos.com
 #-----------------------------------------------------------
 
-# Check current kernel
+# Check current Kernel
 CURKERNEL=$(uname -r|sed 's/-*[a-z]//g'|sed 's/-386//g')
 
-# Define what kernel packages to look for
+# Define what Kernel packages to look for
 LINUXPKG="linux-(image|headers|ubuntu-modules|restricted-modules)"
 METALINUXPKG="linux-(image|headers|restricted-modules)-(generic|i386|i686|server|common|rt|xen)"
 
-# Find old kernels
+# Find old Kernels
 OLDKERNELS=$(dpkg -l|awk '{print $2}'|grep -E $LINUXPKG |grep -vE $METALINUXPKG|grep -v $CURKERNEL)
 
-# check if there are old kernels
+# Check if there are old Kernels
 echo $OLDKERNELS | grep linux*
 if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info --title="Results" --text="No additional kernels found"
@@ -25,13 +25,14 @@ fi
 # sed command adds all FALSE entries in the column 'Select'
 zen=(`echo "$OLDKERNELS" | sed -e  's/^/FALSE\n/'`)
 
-# Main window dialogue.
- DIALOG_TEXT="This will remove kernels you no longer wish to use.
+# Main window dialogue
+DIALOG_TEXT="This will remove kernels you no longer wish to use.
 
 Be sure to select both the header and the image for each version of
 the kernel that you wish to remove.
 
 When you click on Remove, this window will close and the process will begin.
+
 Click on Cancel to halt the cleaning process."
 
 # Call the zenity window icon location.
@@ -57,7 +58,7 @@ fi
 
 zenity --question --title="$APPNAME"  --text="Do you want to proceed? You are about to remove:\n$okernel"
  if [ "$?" -eq "0" ]; then
-      gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "sudo apt-get purge -y $okernel" | zenity --progress --title='Removing Additional Kernels'  --text='Removing...' --no-cancel --pulsate --width=400 --auto-close --auto-kill
+      gksudo -g --message 'To run this cleaner your password is required. Enter your password, or press Cancel.' "sudo apt-get purge -y $okernel" | zenity --progress --title='Removing Additional Kernels' --text='Removing...' --no-cancel --pulsate --width=400 --auto-close --auto-kill
 
                         if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         
