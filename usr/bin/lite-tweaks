@@ -4,7 +4,7 @@
 # Version: 1.0-0180
 # Description: A collection of tools to tweak your Linux Lite system.
 # Authors: Misko_2083, John Jenkins, Jerry Bezencon
-# Date: February 19th, 2015
+# Date: February 20th, 2015
 # Website: https://www.linuxliteos.com
 #--------------------------------------------------------------------------------------------------------
 
@@ -265,6 +265,6 @@ if [ ${#ARRAYB[@]} -ne 0 ]; then
 	gksudo ./lite-tweaks-super ${ARRAYB[@]}      #Open the next file with superuser privileges and pass the array B
 fi
 
-zenity --info --title="Lite Tweaks" --text="Process(s) complete"
+zenity --info --title="Lite Tweaks" --text="Process(s) complete."
 
 exit 0
