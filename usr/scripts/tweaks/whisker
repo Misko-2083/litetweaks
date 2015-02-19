@@ -1,0 +1,54 @@
+#!/bin/bash
+#-------------------------------------------------------------------
+# Description: Lite Tweaks - Clean Whisker Menu Recently Used items
+# Authors: Jerry Bezencon, John Jenkins 2015
+# Website: https://www.linuxliteos.com
+#-------------------------------------------------------------------
+
+WHISKERITEMS=$(cat $HOME/.config/xfce4/panel/whiskermenu-1.rc | grep "^recent=" | cut -d '=' -f2 | sed 's/,/ /g'| wc -w)
+
+# Main window dialogue.
+ INSTALLER_TITLE="Clean Whisker Menu Recently Used items
+------------------------------------------------------------------------------------------------------------------
+This will clean your Whisker Menu Recently Used items.
+
+You currently have <b>$WHISKERITEMS</b> Whisker Menu Recently Used items that can be cleaned.
+When the process finishes, your taskbar will restart.
+
+When you click on Yes, this window will close and the process will begin.
+
+------------------------------------------------------------------------------------------------------------------
+Click on Yes to continue or No to cancel the cleaning process.\nWould you like to continue?"
+
+# Call the zenity window icon location.
+ INSTALL_ICON="/usr/share/pixmaps/litecleaner.png"
+ APPNAME="Clean Whisker Menu Recently Used items"
+        
+        zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
+
+                if [ "$?" -eq "0" ]; then
+                        sed -i 's/^recent=.*$/recent=/g' ~/.config/xfce4/panel/whiskermenu-1.rc && dbus-send --print-reply --dest=org.xfce.Panel /org/xfce/Panel org.xfce.Panel.Terminate boolean:true | zenity --progress --title="Cleaning Whisker Menu Recently Used items" --window-icon="${INSTALL_ICON}" --text="Please wait whilst your Whisker Menu Recently Used items are cleaned..." --pulsate --width=400 --auto-close --auto-kill
+
+
+                                if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        
+                                        zenity --error \
+                                        --title="Error" --text="$APPNAME has failed."
+                                        exit 0
+                                fi
+
+                else
+
+                                        exit 0
+                fi
+
+
+PROCEED=$(zenity --info --title="Cleaner Complete" --window-icon=/usr/share/icons/zenity-llcc.png --width=270 --text="The cleaner has finished."; echo $?)
+if [ ${PROCEED} -eq 1 ]; then
+	zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
+	exit;
+else
+	exit
+fi
+
+exit 0

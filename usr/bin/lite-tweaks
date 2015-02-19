@@ -1,0 +1,268 @@
+#! /bin/bash
+#--------------------------------------------------------------------------------------------------------
+# Name: Lite Tweaks
+# Version: 1.0-0180
+# Description: A collection of tools to tweak your Linux Lite system.
+# Authors: Misko_2083, John Jenkins, Jerry Bezencon
+# Date: February 19th, 2015
+# Website: https://www.linuxliteos.com
+#--------------------------------------------------------------------------------------------------------
+
+#Set funcions for non-root execution
+#The ones that need root go to the other file: lite-software-super
+FIREFOX() {
+	echo "#Removing the Firefox cache..."
+  			rm -rf $HOME/.cache/mozilla/
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nRemoving the Firefox cache!"
+                        fi
+}
+
+CHROME() {
+	echo "#Removing the Google Chrome cache..."
+			rm -rf $HOME/.cache/google-chrome/ 
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nRemoving the Google Chrome cache!"
+                        fi
+}
+
+CHROMIUM() {
+	echo"#Removing the Chromium cache..."
+			rm -rf $HOME/.cache/chromium/
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nRemoving the Chromium cache!"
+                        fi
+}
+
+THUMBNAILS() {
+	echo "#Deleting Thumbnail Cache..."
+	sleep 1
+			 rm -rf $HOME/.thumbnails/*
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nDeleting Thumbnail Cache!"
+                        fi
+}
+
+WHISKER() {
+echo "#Cleaning Whisker Menu Recently Used items..."
+sleep 1
+ sed -i 's/^recent=.*$/recent=/g' ~/.config/xfce4/panel/whiskermenu-1.rc 
+
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nCleaning Whisker Menu Recently Used items!"
+                        fi
+echo "#Restarting the panel..."
+dbus-send --print-reply --dest=org.xfce.Panel /org/xfce/Panel org.xfce.Panel.Terminate boolean:true
+sleep 2
+}
+
+TRASH() {
+	echo "#Emptying the Trash bin..."
+	sleep 1
+ 			 rm -rf $HOME/.local/share/Trash/files/*
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nEmptying the Trash bin!"
+                        fi
+}
+
+# Set the dialogue window icon
+ic="/usr/share/pixmaps/litetweaks.png"
+
+# Check package cache exists
+if [ "$(find /var/cache/apt/archives/ -maxdepth 1 -size +100k)" ];  then
+	APTCACHESIZE=$(du -sh /var/cache/apt/archives/ | awk '{print $1}' | sed 's/$/B/')
+	aptcache=(FALSE "Clean package cache" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your package cache" )
+else
+	aptcache=(FALSE "Clean package cache" "Packages" "Safe" "You can currently remove 0kB worth of files from your package cache")
+fi
+
+# Check if firefox cache exists
+if [  -d  "$HOME/.cache/mozilla/" ];then
+	FFCACHESIZE=$(du -sh "$HOME/.cache/mozilla/"| awk '{print $1}'| sed 's/$/B/')
+	firefox=("FALSE"  "Clean Firefox" "Internet" "Safe" "You can currently remove $FFCACHESIZE from your Firefox cache" )
+else
+        firefox=()
+fi
+
+# Check if the google-chrome cache exists
+if [ -d  "$HOME/.cache/google-chrome/" ]; then
+	GCCACHESIZE=$(du -sh $HOME/.cache/google-chrome/ | awk '{print $1}' | sed 's/$/B/')
+	chrome=("FALSE" "Clean Chrome" "Internet" "Safe" "You can currently remove $GCCACHESIZE from your Chrome cache" )
+	else
+        chrome=() 
+fi
+
+# Check if the chromium cache exists
+if [  -d  "$HOME/.cache/chromium/" ]; then
+	CHRCACHESIZE=$(du -sh $HOME/.cache/chromium/ | awk '{print $1}' | sed 's/$/B/')
+	chromium=("FALSE" "Clean Chromium" "Internet" "Safe" "You can currently remove $CHRCACHESIZE from your Chromium cache" )
+else
+         chromium=() 
+fi
+
+# Check if any thumbnails exist
+if [ $(du -sk $HOME/.thumbnails/ | awk '{print $1}')  -gt 100  ]; then
+        THUMBCACHESIZE=$(du -sh $HOME/.thumbnails/ | awk '{print $1}' | sed 's/$/B/')
+	thumbn=("FALSE" "Clean thumbnail cache" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from your thumbnail cache" )
+else
+        thumbn=( "FALSE" "Clean thumbnail cache" "Images" "Safe" "You can currently remove 0kB from your thumbnail cache" ) 
+fi
+
+# Check if Whisker Menu has Recently Used items
+if [ -z "$(cat $HOME/.config/xfce4/panel/whiskermenu-1.rc | grep "^recent=" | cut -d '=' -f2)" ]; then
+	whisker_recent=(FALSE "Clean Whisker Menu Recently Used" "Menu" "Safe" "Whisker Menu has no Recently Used items to clean" )
+else
+	whisker_test=$(cat $HOME/.config/xfce4/panel/whiskermenu-1.rc | grep "^recent=" | cut -d '=' -f2 | sed 's/,/ /g'| wc -w)
+	whisker_recent=(FALSE "Clean Whisker Menu Recently Used" "Menu" "Safe" "You can currently remove $whisker_test Recently Used items from your Whisker Menu" )
+fi
+
+# Check if the Trash is empty
+if [  "$(ls -A $HOME/.local/share/Trash/files/)" ]; then
+        TRASHCACHESIZE=$(du -sh $HOME/.local/share/Trash/ | awk '{print $1}' | sed 's/$/B/')
+	trash=("FALSE" "Empty your Trash Bin" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from your Trash bin" )
+else
+        trash=() 
+fi
+
+# Main zenity dialogue window
+selection=$(zenity --window-icon="$ic" --list --checklist --width=860 --height=460 --column="Select" --column="Name" --column="Category" --column="Status" \
+ --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform (password required for some tasks).' --title="Lite Tweaks" --ok-label="Begin" --cancel-label="Quit" \
+"${aptcache[@]}" \
+FALSE "Autoremove packages" "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
+"${firefox[@]}" \
+"${chrome[@]}" \
+"${chromium[@]}" \
+"${thumbn[@]}" \
+"${whisker_recent[@]}" \
+"${trash[@]}" \
+FALSE "Set a default web browser" "Browser" "Safe" "Set your default web browser" \
+FALSE "Locate large files" "System" "Caution" "Find files on your system within a size range" \
+FALSE "Remove additional kernels" "System" "Caution" "Remove kernels you no longer wish to boot from" )
+
+# If Quit is clicked then exit
+if [ "${PIPESTATUS[0]}" -ne "0" ]; then 
+      exit 0
+fi
+
+# check if anything is selected
+echo $selection | grep '[a-zA-Z0-9]'
+if [ "${PIPESTATUS[1]}" -ne "0" ]; then
+    zenity --info --title='Lite Tweaks' --text='No option was selected.'
+    exit 0
+fi
+
+#Invoke arays
+ARRAYA=()       # Array for automatic cleaning tool
+ARRAYB=()    # Array for claning tools that require root
+ 
+#Populate arrays
+echo $selection | grep "Clean package cache" > /dev/null
+if [ $? = 0 ];then
+ARRAYB+=('APTGETCLEAN')
+fi
+
+echo $selection | grep "Autoremove packages" > /dev/null
+if [ $? = 0 ];then
+ARRAYB+=('AUTOREMOVE')
+fi
+
+echo $selection | grep "Clean Firefox" > /dev/null
+if [ $? = 0 ];then
+ARRAYA+=('FIREFOX')
+fi
+
+echo $selection | grep "Clean Chrome" > /dev/null
+if [ $? = 0 ];then
+ARRAYA+=('CHROME')
+fi
+
+echo $selection | grep "Clean Chromium" > /dev/null
+if [ $? = 0 ];then
+ARRAYA+=('CHROMIUM')
+fi
+
+echo $selection | grep "Clean thumbnail cache" > /dev/null
+if [ $? = 0 ];then
+ARRAYA+=('THUMBNAILS')
+fi
+
+echo $selection | grep "Clean Whisker Menu Recently Used" > /dev/null
+if [ $? = 0 ];then
+ARRAYA+=('WHISKER')
+fi
+
+echo $selection | grep "Empty your Trash Bin" > /dev/null
+if [ $? = 0 ];then
+ARRAYA+=('TRASH')
+fi
+
+echo $selection | grep "Set a default web browser" > /dev/null
+if [ $? = 0 ];then
+ARRAYB+=('DBROWSER')
+fi
+
+echo $selection | grep "Locate large files" > /dev/null
+if [ $? = 0 ];then
+ARRAYB+=('FILESIZES')
+fi
+
+echo $selection | grep "Remove additional kernels" > /dev/null
+if [ $? = 0 ];then
+ARRAYB+=('REMKERNELS')
+fi
+
+#Check if ARRAYA is empty
+#If it is skip the execution
+if [ ${#ARRAYA[@]} -ne 0 ]; then
+
+
+	x=0
+	for k in "${!ARRAYA[@]}"; do  x=$(( $x + 1 )); done  #Get the total number of selected items in aray A
+
+	TOTAL_LINES=$x
+
+	printf '%s \n' "${ARRAYA[@]}"|
+	while read  line
+		do
+			eval $line     # Execute functions one by one
+			if [ $? = 1 ]; then
+				zenity --error --title="Lite Tweak" --text="There was an error while performing cleaning:\n ${line}"
+				exit 1
+			fi	
+		let i++
+		 (( PERCENTAGE = 100 \* ${i} / ${TOTAL_LINES} ))
+		 echo "$PERCENTAGE"
+
+		if [ "$PERCENTAGE" == "100" ]; then
+			echo "#Done"
+			sleep 2
+		fi
+	
+	done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300
+fi
+
+#Check if ARRAYB is empty
+#If it is skip the execution and exit
+if [ ${#ARRAYB[@]} -ne 0 ]; then
+	gksudo ./lite-tweaks-super ${ARRAYB[@]}      #Open the next file with superuser priviledges and pass the array B
+fi
+
+exit 0

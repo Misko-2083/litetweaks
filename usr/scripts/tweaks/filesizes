@@ -1,0 +1,75 @@
+#!/bin/bash
+#--------------------------------------------------------------
+# Description: Lite Tweaks - Find files in a range
+# Authors: Misko_2083, Jerry Bezencon 2015
+# Website: https://www.linuxliteos.com
+#--------------------------------------------------------------
+
+# Main window dialogue.
+INSTALLER_TITLE="Find files within a range
+---------------------------------------------------------------------------------------------------------------------------
+This will find and list all files on your system in a range.
+
+<b>Do not remove a file from your system unless you know what you are doing.
+This is not a removal tool, it is provided as information only.</b>
+
+When you click on Yes, this window will close and the process will begin.
+---------------------------------------------------------------------------------------------------------------------------
+Click on Yes to continue or No to cancel the system scan.\nWould you like to continue?"
+
+# Call the zenity window icon location.
+INSTALL_ICON="/usr/share/pixmaps/litecleaner.png"
+APPNAME="Find files in a range"
+
+      zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
+        if [ "$?" -eq "0" ]; then
+
+# Set the file size range
+scale_min=$(zenity --title="Select the minimum file size" --scale --text="Select the minimum file size (in MB)" --min-value=25 --max-value=5000 --value=25 --step=25)
+
+if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+      exit 0
+fi
+
+size_min=$(echo $scale_min | sed "s/.*/+&M/")
+
+scale_max=$(zenity --title="Select the maximum file size" --scale --text="Select the maximum file size (in MB)\nMinimum file size is $size_min\B" --min-value=25 --max-value=5000 --value=51 --step=25)
+
+if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+      exit 0
+fi
+
+
+while [ $scale_max -le $scale_min ]; do
+      zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="Maximum value must never be smaller or equal  to minimum value.\nSet it again or click Cancel to exit."
+            scale_max=$(zenity --title="$APPNAME" --scale --text="Select the maximum file size.\nMinimum file size is $size_min\B" --min-value=25 --max-value=5000 --value=51 --step=25)
+
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                  exit 0
+            fi
+done
+
+size_max=$(echo $scale_max | sed "s/.*/-&M/")
+
+x=$( gksudo -g --message 'To run this scanner your password is required. Enter your password, or press Cancel.' "stdbuf -oL /bin/bash \-c '(sudo find / -size $size_min -size $size_max -exec du -mh {} + 2>&1 | grep [0-9][MG] | sort -h -r ) 2>&1 | tee /var/log/findfilesrange.log'" |
+stdbuf -oL sed -e '/\*$/ s/^/# /p'|
+zenity --progress --title="Please wait whilst your system is scanned..." --pulsate \
+--width=600 --auto-close )
+
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+              zenity --error \
+              --title="Error" --text="$APPNAME has failed."
+              exit 0
+            fi
+          else
+            exit 0
+          fi
+
+PROCEED=$(zenity --question --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --text="Scan complete.\n\nWould you like to view the results?"; echo $?)
+if [ ${PROCEED} -eq 1 ]; then
+      zenity --info --title="Scan Complete" --window-icon="${INSTALL_ICON}" --text="Click OK to close."
+    exit;
+else
+    leafpad /var/log/findfilesrange.log &
+fi
+exit 0

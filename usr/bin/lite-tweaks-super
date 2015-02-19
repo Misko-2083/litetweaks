@@ -1,0 +1,336 @@
+#! /bin/bash
+#--------------------------------------------------------------------------------------------------------
+# Name: Lite Tweaks Super
+# Version: 1.0-0180
+# Description: A collection of tools to tweak your Linux Lite system.
+# Authors: Misko_2083, John Jenkins, Jerry Bezencon
+# Date: February 17th, 2015
+# Website: https://www.linuxliteos.com
+#--------------------------------------------------------------------------------------------------------
+
+#Get input from a previous file
+FRM="$@"
+
+#Check if the input is correct and populate aray C
+echo "$FRM" | grep "APTGETCLEAN" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('CLEAN')
+fi
+
+echo $FRM | grep "AUTOREMOVE" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('REMOVE')
+fi
+
+echo $FRM | grep "DBROWSER" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('BROWSER')
+fi
+
+echo $FRM| grep "FILESIZES" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('FILES')
+fi
+
+echo $FRM | grep "REMKERNELS" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('KERNELS')
+fi
+
+CLEAN() {
+echo "#Cleananing the package cache..."
+sleap 2
+	sudo apt-get clean
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nCleananing the package cache!"
+                        fi
+}
+
+REMOVE() {
+	echo "#Removing unneeded packages..."
+	sleep 1
+			sudo apt-get autoremove -y 
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nRemoving unneeded packages!"
+                        fi
+return
+}
+
+
+BROWSER() {
+echo "#Changing the Default Web Browser..."
+
+file="/etc/gnome/defaults.list"
+test_1=(` grep "application/xhtml+xml" $file`)
+test_2=(` grep "text/html" $file`)
+test_3=(`grep "x-scheme-handler/http" $file`)
+test_4=(` grep "x-scheme-handler/https" $file`)
+
+hash firefox 2>/dev/null
+if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
+	if [ "${test_1[0]}" = "application/xhtml+xml=firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=firefox.desktop;" ]; then
+        	firefox=("TRUE" "Firefox" "default" "Firefox is currently your default web browser" )
+	else
+		firefox=("FALSE" "Firefox" "not default" "Set firefox as the default web browser" )
+	fi
+else 
+	firefox=()
+fi
+
+hash chromium-browser 2>/dev/null
+if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
+	if [ "${test_1[0]}" = "application/xhtml+xml=chromium-browser.desktop;firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=chromium-browser.desktop;firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=chromium-browser.desktop;firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=chromium-browser.desktop;firefox.desktop;" ]; then
+		chromium=("TRUE" "Chromium" "default" "Chromium is currently your default web browser" )
+	else
+		chromium=("FALSE" "Chromium" "not default" "Set Chromium as the default web browser" )
+	fi
+else
+	chromium=()
+fi
+
+hash midori 2>/dev/null
+if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
+	if [ "${test_1[0]}" = "application/xhtml+xml=midori.desktop;firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=midori.desktop;firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=midori.desktop;firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=midori.desktop;firefox.desktop;" ]; then
+		midori=("TRUE" "Midori" "default" "Midori is currently your default web browser" )
+	else
+		midori=("FALSE" "Midori" "not default" "Set Midori as the default web browser" )
+	fi
+else
+	midori=()
+fi
+
+hash google-chrome 2>/dev/null
+if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
+	if [ "${test_1[0]}" = "application/xhtml+xml=google-chrome.desktop;firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=google-chrome.desktop;firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=google-chrome.desktop;firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=google-chrome.desktop;firefox.desktop;" ]; then
+		googlechrome=("TRUE" "Google Chrome" "default" "Google Chrome is currently your default web browser" )
+	else
+		googlechrome=("FALSE" "Google Chrome" "not default" "Set Google Chrome as the default web browser" )
+	fi
+else
+	googlechrome=()
+fi
+
+
+		selection=$(zenity --window-icon="$ic" --list --radiolist --width=650 --height=200 --column="Select" --column="Name" --column="Status" \
+		--column="Description" --text="Select the web browser you wish to set as default." --title="Choose default browser" --ok-label="Set" --cancel-label="Cancel" \
+		"${firefox[@]}" "${googlechrome[@]}" "${chromium[@]}" "${midori[@]}" )
+		
+		# "The kill switch"
+		 if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+			return
+		fi
+	case "$selection" in
+	"Firefox") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=firefox.desktop;!g" /etc/gnome/defaults.list `;
+		   `sed -i "s!^"${test_2[0]}"!text/html=firefox.desktop;!g" /etc/gnome/defaults.list `; \
+		   `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=firefox.desktop;!g" /etc/gnome/defaults.list `; \
+		   `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=firefox.desktop;!g" /etc/gnome/defaults.list `;;
+	"Google Chrome") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+	   `sed -i "s!^"${test_2[0]}"!text/html=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+	   `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+	   `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `;;
+	"Chromium") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+	   `sed -i "s!^"${test_2[0]}"!text/html=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+	   `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+	   `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `;;
+	"Midori") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+	   `sed -i "s!^"${test_2[0]}"!text/html=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+	   `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+	   `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `;;
+	esac
+unset file
+}
+
+FILES() {
+echo "#Finding Large Files..."
+
+# Main window dialogue.
+INSTALLER_TITLE="Find files within a range
+---------------------------------------------------------------------------------------------------------------------------
+This will find and list all files on your system in a range.
+
+<b>Do not remove a file from your system unless you know what you are doing.
+This is not a removal tool, it is provided as information only.</b>
+
+When you click on Yes, this window will close and the process will begin.
+---------------------------------------------------------------------------------------------------------------------------
+Click on Yes to continue or No to cancel the system scan.\nWould you like to continue?"
+
+# Call the zenity window icon location.
+INSTALL_ICON="/usr/share/pixmaps/litecleaner.png"
+APPNAME="Find files in a range"
+
+      zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
+        if [ "$?" -eq "0" ]; then
+
+# Set the file size range
+scale_min=$(zenity --title="Select the minimum file size" --scale --text="Select the minimum file size (in MB)" --min-value=25 --max-value=5000 --value=25 --step=25)
+
+if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+      return
+fi
+
+size_min=$(echo $scale_min | sed "s/.*/+&M/")
+
+scale_max=$(zenity --title="Select the maximum file size" --scale --text="Select the maximum file size (in MB)\nMinimum file size is $size_min\B" --min-value=25 --max-value=5000 --value=51 --step=25)
+
+if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+      return
+fi
+
+
+while [ $scale_max -le $scale_min ]; do
+      zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="Maximum value must never be smaller or equal  to minimum value.\nSet it again or click Cancel to exit."
+            scale_max=$(zenity --title="$APPNAME" --scale --text="Select the maximum file size.\nMinimum file size is $size_min\B" --min-value=25 --max-value=5000 --value=51 --step=25)
+
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                  return
+            fi
+done
+
+size_max=$(echo $scale_max | sed "s/.*/-&M/")
+
+find_large=$(gksudo "stdbuf -oL /bin/bash \-c '(sudo find / -size $size_min -size $size_max -exec du -mh {} + 2>&1 | grep [0-9][MG] | sort -h -r ) 2>&1 | tee /var/log/findfilesrange.log'" |
+stdbuf -oL sed -e '/\*$/ s/^/# /p'|
+zenity --progress --title="Please wait whilst your system is scanned..." --pulsate \
+--width=600 --auto-close )
+
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+              zenity --error \
+              --title="Error" --text="$APPNAME has failed."
+             return
+            fi
+          else
+            return
+          fi
+
+PROCEED=$(zenity --question --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --text="Scan complete.\n\nWould you like to view the results?"; echo $?)
+if [ ${PROCEED} -eq 1 ]; then
+      zenity --info --title="Scan Complete" --window-icon="${INSTALL_ICON}" --text="Click OK to close."
+else
+    leafpad /var/log/findfilesrange.log &
+fi
+}
+
+KERNELS() {
+# Check current Kernel
+CURKERNEL=$(uname -r|sed 's/-*[a-z]//g'|sed 's/-386//g')
+
+# Define what Kernel packages to look for
+LINUXPKG="linux-(image|headers|ubuntu-modules|restricted-modules)"
+METALINUXPKG="linux-(image|headers|restricted-modules)-(generic|i386|i686|server|common|rt|xen)"
+
+# Find old Kernels
+OLDKERNELS=$(dpkg -l|awk '{print $2}'|grep -E $LINUXPKG |grep -vE $METALINUXPKG|grep -v $CURKERNEL)
+
+# Check if there are old Kernels
+echo $OLDKERNELS | grep linux*
+if [ "${PIPESTATUS[1]}" -ne "0" ]; then
+    zenity --info --title="Results" --text="No additional kernels found"
+    return
+fi
+
+# sed command adds all FALSE entries in the column 'Select'
+zen=(`echo "$OLDKERNELS" | sort | sed -e  's/^/FALSE\n/'`)
+
+# Main window dialogue
+DIALOG_TEXT="This will remove kernels you no longer wish to use.
+
+Be sure to select both the header and the image for each version of
+the kernel that you wish to remove.
+
+When you click on Remove, this window will close and the process will begin.
+
+Click on Cancel to halt the cleaning process."
+
+# Call the zenity window icon location.
+ic="/usr/share/icons/zenity-llcc.png"
+APPNAME="Kernel Cleaner"
+
+# Call the dialog. Don't change the separator here!
+okernel=$(zenity --window-icon="$ic" --list --checklist --separator=" " --width=500 --height=380   --column="Select" --column="Kernel List" \
+--text="${DIALOG_TEXT}" --title="$APPNAME" --ok-label="Remove" --cancel-label="Cancel" "${zen[@]}" ) 
+
+# If canel is clicked then exit
+if [ "${PIPESTATUS[0]}" -ne "0" ]; then 
+     return
+fi
+
+# check if anything is selected
+echo $okernel | grep linux*
+if [ "${PIPESTATUS[1]}" -ne "0" ]; then
+    zenity --info --title='Cleaner' --text='Nothing was selected.'
+    return
+fi
+
+
+zenity --question --title="$APPNAME"  --text="Do you want to proceed? You are about to remove:\n$okernel"
+ if [ "$?" -eq "0" ]; then
+      sudo apt-get purge -y $okernel | zenity --progress --title='Removing Additional Kernels' --text='Removing...' --no-cancel --pulsate --width=400 --auto-close --auto-kill
+
+                        if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        
+                                        zenity --error \
+                                        --title="Error" --text="$APPNAME has failed."
+                                        return
+                                fi
+
+                else
+
+                                        return
+                fi
+
+
+PROCEED=$(zenity --info --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --width=270 --text="The cleaner has finished."; echo $?)
+if [ ${PROCEED} -eq 1 ]; then
+	zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
+	return
+else
+	return
+fi
+}
+
+
+
+	x=0
+	for k in "${!ARRAYC[@]}"; do  x=$(( $x + 1 )); done  #Get the total number of selected items in the aray
+
+	TOTAL_LINES=$x
+
+	printf '%s \n' "${ARRAYC[@]}"|
+	while read  line
+		do
+			eval $line     # Execute functions one by one
+			if [ $? = 1 ]; then
+				zenity --info --title="Lite Tweak" --text="Error:\n${line}"
+			fi	
+		let i++
+		 (( PERCENTAGE = 100 \* ${i} / ${TOTAL_LINES} ))
+		 echo "$PERCENTAGE"
+
+		if [ "$PERCENTAGE" == "100" ]; then
+			echo "#Done"
+			sleep 2
+		fi
+	
+	done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300 --no-cancel
+
+if [ "$?" -ne "0" ]; then
+    zenity --info --title='Cleaner' --text='User Canceled.'
+    exit 0
+fi
+
+
+unset ARAYC
+unset FRM
+unset okernel
+unset PROCEED
+unset APPNAME
+unset INSTALLER_TITLE
+
+exit 0

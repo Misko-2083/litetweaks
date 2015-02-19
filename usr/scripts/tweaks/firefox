@@ -1,0 +1,53 @@
+#!/bin/bash
+#-----------------------------------------------------------
+# Description: Lite Tweaks - Firefox Web Browser Cleaner
+# Authors: Misko_2083, Jerry Bezencon 2015
+# Website: https://www.linuxliteos.com
+#-----------------------------------------------------------
+
+FFCACHESIZE=$(du -sh $HOME/.cache/mozilla/ | awk '{print $1}' | sed 's/$/B/')
+
+# Main window dialogue.
+ INSTALLER_TITLE="Firefox Web Browser Cleaner
+-------------------------------------------------------------------------------------------------------------
+This will process will purge Firefox of <b>$FFCACHESIZE</b> worth of files.
+
+Please make sure Firefox is closed <b>before</b> you proceed.
+
+When you click on Yes, this window will close and the process will begin.
+
+-------------------------------------------------------------------------------------------------------------
+Click on Yes to continue or No to cancel the cleaning process.\nWould you like to continue?"
+
+# Call the zenity window icon location.
+ INSTALL_ICON="/usr/share/pixmaps/litecleaner.png"
+ APPNAME="Firefox Web Browser Cleaner"
+        
+        zenity --question --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="${INSTALLER_TITLE}"
+
+                if [ "$?" -eq "0" ]; then
+                        rm -rf $HOME/.cache/mozilla/ | zenity --progress --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="Please wait whilst Firefox is being cleaned..." --pulsate --width=400 --auto-close --auto-kill
+
+
+                                if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        
+                                        zenity --error \
+                                        --title="Error" --text="$APPNAME has failed."
+                                        exit 0
+                                fi
+
+                else
+
+                                        exit 0
+                fi
+
+
+PROCEED=$(zenity --info --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --width=270 --text="The cleaner has finished."; echo $?)
+if [ ${PROCEED} -eq 1 ]; then
+	zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
+	exit;
+else
+	exit
+fi
+
+exit 0
