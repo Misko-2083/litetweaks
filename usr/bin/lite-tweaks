@@ -265,4 +265,6 @@ if [ ${#ARRAYB[@]} -ne 0 ]; then
 	gksudo ./lite-tweaks-super ${ARRAYB[@]}      #Open the next file with superuser privileges and pass the array B
 fi
 
+zenity --info --title="Lite Tweaks" --text="Process(s) complete"
+
 exit 0
