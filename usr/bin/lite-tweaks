@@ -8,8 +8,8 @@
 # Website: https://www.linuxliteos.com
 #--------------------------------------------------------------------------------------------------------
 
-#Set funcions for non-root execution
-#The ones that need root go to the other file: lite-software-super
+# Set functions for non-root execution
+# The ones that need root go to the other file: lite-software-super
 FIREFOX() {
 	echo "#Removing the Firefox cache..."
   			rm -rf $HOME/.cache/mozilla/
@@ -162,18 +162,18 @@ if [ "${PIPESTATUS[0]}" -ne "0" ]; then
       exit 0
 fi
 
-# check if anything is selected
+# Check if anything is selected
 echo $selection | grep '[a-zA-Z0-9]'
 if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info --title='Lite Tweaks' --text='No option was selected.'
     exit 0
 fi
 
-#Invoke arays
+# Invoke arrays
 ARRAYA=()       # Array for automatic cleaning tool
-ARRAYB=()    # Array for claning tools that require root
+ARRAYB=()    # Array for cleaning tools that require root
  
-#Populate arrays
+# Populate arrays
 echo $selection | grep "Clean package cache" > /dev/null
 if [ $? = 0 ];then
 ARRAYB+=('APTGETCLEAN')
@@ -229,13 +229,13 @@ if [ $? = 0 ];then
 ARRAYB+=('REMKERNELS')
 fi
 
-#Check if ARRAYA is empty
-#If it is skip the execution
+# Check if ARRAYA is empty
+# If it is skip the execution
 if [ ${#ARRAYA[@]} -ne 0 ]; then
 
 
 	x=0
-	for k in "${!ARRAYA[@]}"; do  x=$(( $x + 1 )); done  #Get the total number of selected items in aray A
+	for k in "${!ARRAYA[@]}"; do  x=$(( $x + 1 )); done  # Get the total number of selected items in array A
 
 	TOTAL_LINES=$x
 
@@ -259,10 +259,10 @@ if [ ${#ARRAYA[@]} -ne 0 ]; then
 	done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300
 fi
 
-#Check if ARRAYB is empty
-#If it is skip the execution and exit
+# Check if ARRAYB is empty
+# If it is skip the execution and exit
 if [ ${#ARRAYB[@]} -ne 0 ]; then
-	gksudo ./lite-tweaks-super ${ARRAYB[@]}      #Open the next file with superuser priviledges and pass the array B
+	gksudo ./lite-tweaks-super ${ARRAYB[@]}      #Open the next file with superuser privileges and pass the array B
 fi
 
 exit 0

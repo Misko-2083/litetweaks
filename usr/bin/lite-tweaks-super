@@ -8,10 +8,10 @@
 # Website: https://www.linuxliteos.com
 #--------------------------------------------------------------------------------------------------------
 
-#Get input from a previous file
+# Get input from a previous file
 FRM="$@"
 
-#Check if the input is correct and populate aray C
+# Check if the input is correct and populate array C
 echo "$FRM" | grep "APTGETCLEAN" > /dev/null
 if [ $? = 0 ];then
 ARRAYC+=('CLEAN')
@@ -38,14 +38,14 @@ ARRAYC+=('KERNELS')
 fi
 
 CLEAN() {
-echo "#Cleananing the package cache..."
+echo "#Cleaning the package cache..."
 sleap 2
 	sudo apt-get clean
 			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
 					sleep 2
                                         zenity --error \
-                                        --title="Error" --text="There was an error while\nCleananing the package cache!"
+                                        --title="Error" --text="There was an error while\nCleaning the package cache!"
                         fi
 }
 
@@ -149,7 +149,7 @@ unset file
 FILES() {
 echo "#Finding Large Files..."
 
-# Main window dialogue.
+# Main window dialogue
 INSTALLER_TITLE="Find files within a range
 ---------------------------------------------------------------------------------------------------------------------------
 This will find and list all files on your system in a range.
@@ -256,12 +256,12 @@ APPNAME="Kernel Cleaner"
 okernel=$(zenity --window-icon="$ic" --list --checklist --separator=" " --width=500 --height=380   --column="Select" --column="Kernel List" \
 --text="${DIALOG_TEXT}" --title="$APPNAME" --ok-label="Remove" --cancel-label="Cancel" "${zen[@]}" ) 
 
-# If canel is clicked then exit
+# If cancel is clicked then exit
 if [ "${PIPESTATUS[0]}" -ne "0" ]; then 
      return
 fi
 
-# check if anything is selected
+# Check if anything is selected
 echo $okernel | grep linux*
 if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info --title='Cleaner' --text='Nothing was selected.'
@@ -298,7 +298,7 @@ fi
 
 
 	x=0
-	for k in "${!ARRAYC[@]}"; do  x=$(( $x + 1 )); done  #Get the total number of selected items in the aray
+	for k in "${!ARRAYC[@]}"; do  x=$(( $x + 1 )); done  # Get the total number of selected items in the array
 
 	TOTAL_LINES=$x
 
