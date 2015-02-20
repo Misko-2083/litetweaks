@@ -320,11 +320,6 @@ fi
 	
 	done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300 --no-cancel
 
-if [ "$?" -ne "0" ]; then
-    zenity --info --title='Cleaner' --text='User Canceled.'
-    exit 0
-fi
-
 
 unset ARAYC
 unset FRM
@@ -332,5 +327,3 @@ unset okernel
 unset PROCEED
 unset APPNAME
 unset INSTALLER_TITLE
-
-exit 0

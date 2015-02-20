@@ -262,7 +262,7 @@ fi
 # Check if ARRAYB is empty
 # If it is skip the execution and exit
 if [ ${#ARRAYB[@]} -ne 0 ]; then
-	gksudo ./lite-tweaks-super ${ARRAYB[@]}      #Open the next file with superuser privileges and pass the array B
+	gksudo /usr/bin/lite-tweaks-super "${ARRAYB[@]}"      #Open the next file with superuser privileges and pass the array B
 fi
 
 zenity --info --title="Lite Tweaks" --text="Process(s) complete."
