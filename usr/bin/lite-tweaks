@@ -203,8 +203,8 @@ else
 fi
 
 # Check if archived /var/log files exist
-if [ "$(find /var/log -type f -regex ".*\.gz$" -maxdepth 100 -size +1k)" ];  then
-	LOGARCHIVESIZE=$(find /var/log -iregex .*\.gz$ -exec du -csh '{}' + | tail -1 | awk '{print $1}' | sed 's/$/B/')
+if [ "$(find /var/log -type f \( -iname \*.gz -o -iname \*.0 -o -iname \*.1 \) -maxdepth 100 -size +1k)" ];  then
+	LOGARCHIVESIZE=$(find /var/log -type f \( -iname \*.gz -o -iname \*.0 -o -iname \*.1 \) -exec du -csh '{}' + | tail -1 | awk '{print $1}' | sed 's/$/B/')
 	logarchive=(FALSE "Log Archives" "Clean" "System" "Safe" "You currently have $LOGARCHIVESIZE worth of archived logs" )
 else
 	logarchive=(FALSE "Log Archives" "Clean" "System" "Safe" "You can currently remove 0kB worth of archived logs")

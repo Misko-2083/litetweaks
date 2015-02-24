@@ -57,7 +57,7 @@ sleep 2
 LARCHIVES() {
 echo "#Deleting archived logs..."
 sleep 2
-	sudo find /var/log \( -name '*.gz' \) -exec rm -rf {} \;
+	sudo find /var/log \( -name '*.gz' -o -name '*.0' -o -name '*.1' \) -exec rm -rf {} \;
 			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error..."
 					sleep 2
