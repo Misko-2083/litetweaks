@@ -37,15 +37,32 @@ if [ $? = 0 ];then
 ARRAYC+=('KERNELS')
 fi
 
+echo $FRM | grep "LOGARCHIVES" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('LARCHIVES')
+fi
+
 CLEAN() {
 echo "#Cleaning the package cache..."
-sleap 2
+sleep 2
 	sudo apt-get clean
 			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-                        echo "#Error"
+                        echo "#Error..."
 					sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nCleaning the package cache!"
+                        fi
+}
+
+LARCHIVES() {
+echo "#Deleting archived logs..."
+sleep 2
+	sudo find /var/log \( -name '*.gz' \) -exec rm -rf {} \;
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error..."
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nDeleting archived logs!"
                         fi
 }
 
@@ -54,14 +71,13 @@ REMOVE() {
 	sleep 1
 			sudo apt-get autoremove -y 
 			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-                        echo "#Error"
+                        echo "#Error..."
 					sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nRemoving unneeded packages!"
                         fi
 return
 }
-
 
 BROWSER() {
 echo "#Changing the Default Web Browser..."
@@ -115,7 +131,6 @@ if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
 else
 	googlechrome=()
 fi
-
 
 		selection=$(zenity --window-icon="$ic" --list --radiolist --width=650 --height=200 --column="Select" --column="Name" --column="Status" \
 		--column="Description" --text="Select the web browser you wish to set as default." --title="Choose default browser" --ok-label="Set" --cancel-label="Cancel" \
@@ -182,7 +197,6 @@ scale_max=$(zenity --title="Select the maximum file size" --scale --text="Select
 if [ "${PIPESTATUS[0]}" -ne "0" ]; then
       return
 fi
-
 
 while [ $scale_max -le $scale_min ]; do
       zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="Maximum value must never be smaller or equal  to minimum value.\nSet it again or click Cancel to exit."
@@ -268,7 +282,6 @@ if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     return
 fi
 
-
 zenity --question --title="$APPNAME"  --text="Do you want to proceed? You are about to remove:\n$okernel"
  if [ "$?" -eq "0" ]; then
       sudo apt-get purge -y $okernel | zenity --progress --title='Removing Additional Kernels' --text='Removing...' --no-cancel --pulsate --width=400 --auto-close --auto-kill
@@ -285,7 +298,6 @@ zenity --question --title="$APPNAME"  --text="Do you want to proceed? You are ab
                                         return
                 fi
 
-
 PROCEED=$(zenity --info --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --width=270 --text="The cleaner has finished."; echo $?)
 if [ ${PROCEED} -eq 1 ]; then
 	zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
@@ -294,8 +306,6 @@ else
 	return
 fi
 }
-
-
 
 	x=0
 	for k in "${!ARRAYC[@]}"; do  x=$(( $x + 1 )); done  # Get the total number of selected items in the array
@@ -319,7 +329,6 @@ fi
 		fi
 	
 	done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300 --no-cancel
-
 
 unset ARAYC
 unset FRM

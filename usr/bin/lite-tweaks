@@ -147,13 +147,17 @@ if [ $? = 0 ];then
 ARRAYB+=('REMKERNELS')
 fi
 
+echo $selection | grep "Log Archives" > /dev/null
+if [ $? = 0 ];then
+ARRAYB+=('LOGARCHIVES')
+fi
+
 }
 
 RUN() {
 # Check if ARRAYA is empty
 # If it is skip the execution
 if [ ${#ARRAYA[@]} -ne 0 ]; then
-
 
 	x=0
 	for k in "${!ARRAYA[@]}"; do  x=$(( $x + 1 )); done  # Get the total number of selected items in array A
@@ -180,7 +184,6 @@ if [ ${#ARRAYA[@]} -ne 0 ]; then
 	done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300
 fi
 
-
 # Check if ARRAYB is empty
 # If it is skip the execution
 if [ ${#ARRAYB[@]} -ne 0 ]; then
@@ -197,6 +200,14 @@ if [ "$(find /var/cache/apt/archives/ -maxdepth 1 -size +100k)" ];  then
 	aptcache=(FALSE "Package Cache" "Clean" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your package cache" )
 else
 	aptcache=(FALSE "Package Cache" "Clean" "Packages" "Safe" "You can currently remove 0kB worth of files from your package cache")
+fi
+
+# Check if archived /var/log files exist
+if [ "$(find /var/log -type f -regex ".*\.gz$" -maxdepth 100 -size +1k)" ];  then
+	LOGARCHIVESIZE=$(find /var/log -iregex .*\.gz$ -exec du -csh '{}' + | tail -1 | awk '{print $1}' | sed 's/$/B/')
+	logarchive=(FALSE "Log Archives" "Clean" "System" "Safe" "You currently have $LOGARCHIVESIZE worth of archived logs" )
+else
+	logarchive=(FALSE "Log Archives" "Clean" "System" "Safe" "You can currently remove 0kB worth of archived logs")
 fi
 
 # Check if firefox cache exists
@@ -254,7 +265,7 @@ while (true); do
 CHECK		# first run the checks
 
 # Main zenity dialogue window
-selection=$(zenity --window-icon="$ic" --list --checklist --width=880 --height=460 --column="Select" --column="Name" --column="Task" --column="Category" --column="Status" \
+selection=$(zenity --window-icon="$ic" --list --checklist --width=880 --height=480 --column="Select" --column="Name" --column="Task" --column="Category" --column="Status" \
  --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform (password required for some tasks).' --title="Lite Tweaks" --ok-label="Begin" --cancel-label="Quit" \
 FALSE "Autoremove Packages" "Clean" "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
 "${chrome[@]}" \
@@ -263,6 +274,7 @@ FALSE "Default Web Browser" "Preferred" "Browser" "Safe" "Set your default web b
 "${firefox[@]}" \
 FALSE "Kernel Removal" "Clean" "System" "Caution" "Remove kernels you no longer wish to boot from" \
 FALSE "Locate Large Files" "Information" "System" "Caution" "Find files on your system within a size range" \
+"${logarchive[@]}" \
 "${aptcache[@]}" \
 "${thumbn[@]}" \
 "${trash[@]}" \
