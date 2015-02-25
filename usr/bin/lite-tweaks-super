@@ -42,6 +42,11 @@ if [ $? = 0 ];then
 ARRAYC+=('LARCHIVES')
 fi
 
+echo $FRM | grep "RESIDCONFIG" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('RCONFIG')
+fi
+
 CLEAN() {
 echo "#Cleaning the package cache..."
 sleep 2
@@ -68,13 +73,25 @@ sleep 2
 
 REMOVE() {
 	echo "#Removing unneeded packages..."
-	sleep 1
+	sleep 2
 			sudo apt-get autoremove -y 
 			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error..."
 					sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nRemoving unneeded packages!"
+                        fi
+}
+
+RCONFIG() {
+	echo "#Removing residual configuration files..."
+	sleep 1
+			sudo dpkg --purge `dpkg --get-selections | grep deinstall | cut -f1` 
+			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error..."
+					sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nRemoving residual configuration files!"
                         fi
 return
 }
