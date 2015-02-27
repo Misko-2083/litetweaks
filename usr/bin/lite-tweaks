@@ -152,7 +152,7 @@ if [ $? = 0 ];then
 ARRAYB+=('LOGARCHIVES')
 fi
 
-echo $selection | grep "Residual Configuration Files" > /dev/null
+echo $selection | grep "Residual Config Files" > /dev/null
 if [ $? = 0 ];then
 ARRAYB+=('RESIDCONFIG')
 fi
@@ -239,13 +239,13 @@ else
          chromium=() # Main zenity dialogue window
 fi
 
-# Check if there are any residual configuration files
-if [ $(dpkg-query -f '${Package} ${Status}\n' -W | grep config-files$ | cut -d" " -f1)  ]; then
-        RESCONFIGQTY=$(dpkg-query -f '${Package} ${Status}\n' -W | grep config-files$ | cut -d" " -f1 | sed 's/,/ /g'| wc -w)
-	resconfig=(FALSE "Residual Config Files" "Clean" "Packages" "Safe" "You currently have $RESCONFIGQTY residual configuration files you can remove" )
-else
-        resconfig=( FALSE "Residual Config Files" "Clean" "Packages" "Safe" "There are no residual configuration files that can be removed" ) 
-fi
+# Check if there are any residual configuration files - to be fixed in the future, currently reporting incorrectly
+# if [ $(dpkg-query -f '${Package} ${Status}\n' -W | grep config-files$ | cut -d" " -f1)  ]; then
+#        RESCONFIGQTY=$(dpkg-query -f '${Package} ${Status}\n' -W | grep config-files$ | cut -d" " -f1 | sed 's/,/ /g'| wc -w)
+#	resconfig=("FALSE" "Residual Config Files" "Clean" "Packages" "Safe" "You currently have $RESCONFIGQTY residual configuration files you can remove" )
+# else
+#        resconfig=("FALSE" "Residual Config Files" "Clean" "Packages" "Safe" "There are no residual configuration files that can be removed" ) 
+# fi
 
 # Check if any thumbnails exist
 if [ $(du -sk $HOME/.thumbnails/ | awk '{print $1}')  -gt 100  ]; then
@@ -289,7 +289,7 @@ FALSE "Kernel Removal" "Clean" "System" "Caution" "Remove kernels you no longer 
 FALSE "Locate Large Files" "Information" "System" "Caution" "Find files on your system within a size range" \
 "${logarchive[@]}" \
 "${aptcache[@]}" \
-"${resconfig[@]}" \
+FALSE "Residual Config Files" "Clean" "Packages" "Safe" "Remove residual configuration files from your system" \
 "${thumbn[@]}" \
 "${trash[@]}" \
 "${whisker_recent[@]}" )
