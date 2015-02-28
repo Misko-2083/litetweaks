@@ -11,45 +11,45 @@
 # Set functions for non-root execution
 # The ones that need root go to the other file: lite-software-super
 FIREFOX() {
-	echo "#Removing the Firefox cache..."
-  			rm -rf $HOME/.cache/mozilla/
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+    echo "#Removing the Firefox cache..."
+              rm -rf $HOME/.cache/mozilla/
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nRemoving the Firefox cache!"
                         fi
 }
 
 CHROME() {
-	echo "#Removing the Google Chrome cache..."
-			rm -rf $HOME/.cache/google-chrome/ 
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+    echo "#Removing the Google Chrome cache..."
+            rm -rf $HOME/.cache/google-chrome/ 
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nRemoving the Google Chrome cache!"
                         fi
 }
 
 CHROMIUM() {
-	echo"#Removing the Chromium cache..."
-			rm -rf $HOME/.cache/chromium/
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+    echo"#Removing the Chromium cache..."
+            rm -rf $HOME/.cache/chromium/
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nRemoving the Chromium cache!"
                         fi
 }
 
 THUMBNAILS() {
-	echo "#Deleting Thumbnail Cache..."
-	sleep 1
-			 rm -rf $HOME/.thumbnails/*
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+    echo "#Deleting Thumbnail Cache..."
+    sleep 1
+             rm -rf $HOME/.thumbnails/*
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nDeleting Thumbnail Cache!"
                         fi
@@ -60,9 +60,9 @@ echo "#Cleaning Whisker Menu Recently Used items..."
 sleep 1
  sed -i 's/^recent=.*$/recent=/g' ~/.config/xfce4/panel/whiskermenu-1.rc 
 
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nCleaning Whisker Menu Recently Used items!"
                         fi
@@ -72,15 +72,39 @@ sleep 2
 }
 
 TRASH() {
-	echo "#Emptying the Trash bin..."
-	sleep 1
- 			 rm -rf $HOME/.local/share/Trash/files/*
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+    echo "#Emptying the Trash bin..."
+    sleep 1
+              rm -rf $HOME/.local/share/Trash/files/*
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nEmptying the Trash bin!"
                         fi
+}
+
+DU() {
+DU_TEXT="Double click on any <b>Partition</b> to open in the file manager.
+Click on any Column to sort the information."
+DU_TITLE="Disk Usage"
+TMP_DU=$(mktemp /tmp/diskusage.XXXXX)
+
+df -h -T| tail -n+2 | while read fs type size used rest target; do
+    if [[ $rest ]] ; then
+        echo ${fs} ${type} ${size}B ${used}B ${rest}B ${target} |grep /dev/sd |
+    awk '{print $1,"\n",$2,"\n",$3,"\n",$4,"\n",$5,"\n",$6}BEGIN{ s = 7; e = 35; }{for (i=s; i<=e; i++) printf("%s%s", $(i), i<e ? OFS : "\n"); }' #Workaround for disk labels that contain whitespaces(number of characters that can be divided by whitespace =e-s)
+    fi
+done |sed -e 's/[ \t]*$//' $1|  tee $TMP_DU 
+
+SEL=$(cat $TMP_DU | zenity --list --width=600 --height=350 --title="${DU_TITLE}" --text="${DU_TEXT}" --column="Device" --column="Filesystem" --column="Size" --column="Used" --column="Free" --column="%Used" --column="Partition" --print-column="7" "${DFARRAY[@]}")
+
+if [ -z "$SEL" ]; then
+rm -f $TMP_DU
+return
+fi
+
+thunar "$SEL"
+rm -f $TMP_DU
 }
 
 # Set the dialogue window icon
@@ -115,6 +139,11 @@ fi
 echo $selection | grep "Chromium" > /dev/null
 if [ $? = 0 ];then
 ARRAYA+=('CHROMIUM')
+fi
+
+echo $selection | grep "Display Disk Usage" > /dev/null
+if [ $? = 0 ];then
+ARRAYA+=('DU')
 fi
 
 echo $selection | grep "Thumbnail Cache" > /dev/null
@@ -157,6 +186,10 @@ if [ $? = 0 ];then
 ARRAYB+=('RESIDCONFIG')
 fi
 
+echo $selection | grep "Bootup Fix" > /dev/null
+if [ $? = 0 ];then
+ARRAYB+=('FIXBOOTUP')
+fi
 }
 
 RUN() {
@@ -164,118 +197,130 @@ RUN() {
 # If it is skip the execution
 if [ ${#ARRAYA[@]} -ne 0 ]; then
 
-	x=0
-	for k in "${!ARRAYA[@]}"; do  x=$(( $x + 1 )); done  # Get the total number of selected items in array A
+    x=0
+    for k in "${!ARRAYA[@]}"; do  x=$(( $x + 1 )); done  # Get the total number of selected items in array A
 
-	TOTAL_LINES=$x
+    TOTAL_LINES=$x
 
-	printf '%s \n' "${ARRAYA[@]}"|
-	while read  line
-		do
-			eval $line     # Execute functions one by one
-			if [ $? = 1 ]; then
-				zenity --error --title="Lite Tweaks" --text="There was an error while performing cleaning:\n ${line}"
-				exit 1
-			fi	
-		let i++
-		 (( PERCENTAGE = 100 \* ${i} / ${TOTAL_LINES} ))
-		 echo "$PERCENTAGE"
+    printf '%s \n' "${ARRAYA[@]}"|
+    while read  line
+        do
+            $line     # Execute functions one by one
+            if [ $? = 1 ]; then
+                zenity --error --title="Lite Tweaks" --text="There was an error while performing cleaning:\n ${line}"
+                exit 1
+            fi    
+        let i++
+         (( PERCENTAGE = 100 \* ${i} / ${TOTAL_LINES} ))
+         echo "$PERCENTAGE"
 
-		if [ "$PERCENTAGE" == "100" ]; then
-			echo "#Done"
-			sleep 2
-		fi
-	
-	done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300
+        if [ "$PERCENTAGE" == "100" ]; then
+            echo "#Done"
+            sleep 2
+        fi
+    
+    done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300
 fi
 
 # Check if ARRAYB is empty
 # If it is skip the execution
 if [ ${#ARRAYB[@]} -ne 0 ]; then
-	gksudo /usr/bin/lite-tweaks-super "${ARRAYB[@]}"      # Open the next file with superuser privileges and pass the array B
+    gksudo /usr/bin/lite-tweaks-super "${ARRAYB[@]}"      # Open the next file with superuser privileges and pass the array B
 fi
 
-zenity --info --title="Lite Tweaks" --text="Process(s) complete."
+if zenity --question --title="Lite Tweaks" --text="Process(s) complete.\nWould you like to continue using Lite-Tweaks?"; then
+    return
+else
+    exit 0
+fi
 }
 
 CHECK() {
 # Check package cache exists
 if [ "$(find /var/cache/apt/archives/ -maxdepth 1 -size +100k)" ];  then
-	APTCACHESIZE=$(du -sh /var/cache/apt/archives/ | awk '{print $1}' | sed 's/$/B/')
-	aptcache=(FALSE "Package Cache" "Clean" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your package cache" )
+    APTCACHESIZE=$(du -sh /var/cache/apt/archives/ | awk '{print $1}' | sed 's/$/B/')
+    aptcache=(FALSE "Package Cache" "Clean" "Packages" "Safe" "You can currently remove $APTCACHESIZE worth of files from your package cache" )
 else
-	aptcache=(FALSE "Package Cache" "Clean" "Packages" "Safe" "You can currently remove 0kB worth of files from your package cache")
+    aptcache=(FALSE "Package Cache" "Clean" "Packages" "Safe" "You can currently remove 0kB worth of files from your package cache")
 fi
 
 # Check if archived /var/log files exist
 if [ "$(find /var/log -type f \( -iname \*.gz -o -iname \*.0 -o -iname \*.1 \) -maxdepth 100 -size +1k)" ];  then
-	LOGARCHIVESIZE=$(find /var/log -type f \( -iname \*.gz -o -iname \*.0 -o -iname \*.1 \) -exec du -csh '{}' + | tail -1 | awk '{print $1}' | sed 's/$/B/')
-	logarchive=(FALSE "Log Archives" "Clean" "System" "Safe" "You can currently remove $LOGARCHIVESIZE worth of archived logs" )
+    LOGARCHIVESIZE=$(find /var/log -type f \( -iname \*.gz -o -iname \*.0 -o -iname \*.1 \) -exec du -csh '{}' + | tail -1 | awk '{print $1}' | sed 's/$/B/')
+    logarchive=(FALSE "Log Archives" "Clean" "System" "Safe" "You can currently remove $LOGARCHIVESIZE worth of archived logs" )
 else
-	logarchive=(FALSE "Log Archives" "Clean" "System" "Safe" "You can currently remove 0kB worth of archived logs")
+    logarchive=(FALSE "Log Archives" "Clean" "System" "Safe" "You can currently remove 0kB worth of archived logs")
 fi
 
 # Check if firefox cache exists
 if [  -d  "$HOME/.cache/mozilla/" ];then
-	FFCACHESIZE=$(du -sh "$HOME/.cache/mozilla/"| awk '{print $1}'| sed 's/$/B/')
-	firefox=("FALSE"  "Firefox" "Clean" "Internet" "Safe" "You can currently remove $FFCACHESIZE from your Firefox cache" )
+    FFCACHESIZE=$(du -sh "$HOME/.cache/mozilla/"| awk '{print $1}'| sed 's/$/B/')
+    firefox=("FALSE"  "Firefox" "Clean" "Internet" "Safe" "You can currently remove $FFCACHESIZE from your Firefox cache" )
 else
         firefox=()
 fi
 
 # Check if the google-chrome cache exists
 if [ -d  "$HOME/.cache/google-chrome/" ]; then
-	GCCACHESIZE=$(du -sh $HOME/.cache/google-chrome/ | awk '{print $1}' | sed 's/$/B/')
-	chrome=("FALSE" "Chrome" "Clean" "Internet" "Safe" "You can currently remove $GCCACHESIZE from your Chrome cache" )
-	else
+    GCCACHESIZE=$(du -sh $HOME/.cache/google-chrome/ | awk '{print $1}' | sed 's/$/B/')
+    chrome=("FALSE" "Chrome" "Clean" "Internet" "Safe" "You can currently remove $GCCACHESIZE from your Chrome cache" )
+    else
         chrome=() 
 fi
 
 # Check if the chromium cache exists
 if [  -d  "$HOME/.cache/chromium/" ]; then
-	CHRCACHESIZE=$(du -sh $HOME/.cache/chromium/ | awk '{print $1}' | sed 's/$/B/')
-	chromium=("FALSE" "Chromium" "Clean" "Internet" "Safe" "You can currently remove $CHRCACHESIZE from your Chromium cache" )
+    CHRCACHESIZE=$(du -sh $HOME/.cache/chromium/ | awk '{print $1}' | sed 's/$/B/')
+    chromium=("FALSE" "Chromium" "Clean" "Internet" "Safe" "You can currently remove $CHRCACHESIZE from your Chromium cache" )
 else
          chromium=() # Main zenity dialogue window
 fi
 
-# Check if there are any residual configuration files - to be fixed in the future, currently reporting incorrectly
-# if [ $(dpkg-query -f '${Package} ${Status}\n' -W | grep config-files$ | cut -d" " -f1)  ]; then
-#        RESCONFIGQTY=$(dpkg-query -f '${Package} ${Status}\n' -W | grep config-files$ | cut -d" " -f1 | sed 's/,/ /g'| wc -w)
-#	resconfig=("FALSE" "Residual Config Files" "Clean" "Packages" "Safe" "You currently have $RESCONFIGQTY residual configuration files you can remove" )
-# else
-#        resconfig=("FALSE" "Residual Config Files" "Clean" "Packages" "Safe" "There are no residual configuration files that can be removed" ) 
-# fi
+# Check if there are any residual configuration files
+if [ ! -z  "$(dpkg -l | grep '^rc')"  ]; then
+        RESCONFIGQTY=$(dpkg -l | grep '^rc' | awk '{print $2}'| wc -w)
+    resconfig=(FALSE "Residual Config Files" "Clean" "Packages" "Safe" "You currently have $RESCONFIGQTY residual configuration files you can remove" )
+else
+        resconfig=( FALSE "Residual Config Files" "Clean" "Packages" "Safe" "There are no residual configuration files that can be removed" ) 
+fi
 
 # Check if any thumbnails exist
 if [ $(du -sk $HOME/.thumbnails/ | awk '{print $1}')  -gt 100  ]; then
         THUMBCACHESIZE=$(du -sh $HOME/.thumbnails/ | awk '{print $1}' | sed 's/$/B/')
-	thumbn=("FALSE" "Thumbnail Cache" "Clean" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from your thumbnail cache" )
+    thumbn=("FALSE" "Thumbnail Cache" "Clean" "Images" "Safe" "You can currently remove $THUMBCACHESIZE from your thumbnail cache" )
 else
         thumbn=( "FALSE" "Thumbnail Cache" "Clean" "Images" "Safe" "You can currently remove 0kB from your thumbnail cache" ) 
 fi
 
 # Check if Whisker Menu has Recently Used items
 if [ -z "$(cat $HOME/.config/xfce4/panel/whiskermenu-1.rc | grep "^recent=" | cut -d '=' -f2)" ]; then
-	whisker_recent=(FALSE "Whisker Menu" "Clean" "Menu" "Safe" "Whisker Menu has no Recently Used items to clean" )
+    whisker_recent=(FALSE "Whisker Menu" "Clean" "Menu" "Safe" "Whisker Menu has no Recently Used items to clean" )
 else
-	whisker_test=$(cat $HOME/.config/xfce4/panel/whiskermenu-1.rc | grep "^recent=" | cut -d '=' -f2 | sed 's/,/ /g'| wc -w)
-	whisker_recent=(FALSE "Whisker Menu" "Clean" "Menu" "Safe" "You can currently remove $whisker_test Recently Used items from your Whisker Menu" )
+    whisker_test=$(cat $HOME/.config/xfce4/panel/whiskermenu-1.rc | grep "^recent=" | cut -d '=' -f2 | sed 's/,/ /g'| wc -w)
+    whisker_recent=(FALSE "Whisker Menu" "Clean" "Menu" "Safe" "You can currently remove $whisker_test Recently Used items from your Whisker Menu" )
 fi
 
 # Check if the Trash is empty
 if [  "$(ls -A $HOME/.local/share/Trash/files/)" ]; then
         TRASHCACHESIZE=$(du -sh $HOME/.local/share/Trash/ | awk '{print $1}' | sed 's/$/B/')
-	trash=("FALSE" "Trash Bin" "Clean" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from your Trash bin" )
+    trash=("FALSE" "Trash Bin" "Clean" "Home" "Safe" "You can currently remove $TRASHCACHESIZE from your Trash bin" )
 else
         trash=() 
 fi
+
+# Check LL version
+LL_VERSION=$(awk '{print $3}' /etc/llver)
+case $LL_VERSION in
+2.0)fixbootup=() ;;
+2.2)fixbootup=(FALSE "Bootup Fix" "Fix" "Repair" "Safe" "Fix the bootup" ) ;;
+2.4)fixbootup=() ;;
+esac
 }
 
 #Main loop
 while (true); do
 
-CHECK		# first run the checks
+CHECK        # first run the checks
 
 # Main zenity dialogue window
 selection=$(zenity --window-icon="$ic" --list --checklist --width=880 --height=500 --column="Select" --column="Name" --column="Task" --column="Category" --column="Status" \
@@ -284,12 +329,14 @@ FALSE "Autoremove Packages" "Clean" "Packages" "Safe" "Remove packages installed
 "${chrome[@]}" \
 "${chromium[@]}" \
 FALSE "Default Web Browser" "Preferred" "Browser" "Safe" "Set your default web browser" \
+FALSE "Display Disk Usage" "Information" "System" "safe" "Display overall disk usage information" \
 "${firefox[@]}" \
+"${fixbootup[@]}" \
 FALSE "Kernel Removal" "Clean" "System" "Caution" "Remove kernels you no longer wish to boot from" \
 FALSE "Locate Large Files" "Information" "System" "Caution" "Find files on your system within a size range" \
 "${logarchive[@]}" \
 "${aptcache[@]}" \
-FALSE "Residual Config Files" "Clean" "Packages" "Safe" "Remove residual configuration files from your system" \
+"${resconfig[@]}" \
 "${thumbn[@]}" \
 "${trash[@]}" \
 "${whisker_recent[@]}" )

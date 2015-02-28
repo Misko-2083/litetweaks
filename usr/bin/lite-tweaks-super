@@ -47,13 +47,18 @@ if [ $? = 0 ];then
 ARRAYC+=('RCONFIG')
 fi
 
+echo $FRM | grep "FIXBOOTUP" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('FIXBOOTUP')
+fi
+
 CLEAN() {
 echo "#Cleaning the package cache..."
 sleep 2
-	sudo apt-get clean
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+    sudo apt-get clean
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error..."
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nCleaning the package cache!"
                         fi
@@ -62,34 +67,34 @@ sleep 2
 LARCHIVES() {
 echo "#Deleting archived logs..."
 sleep 2
-	sudo find /var/log \( -name '*.gz' -o -name '*.0' -o -name '*.1' \) -exec rm -rf {} \;
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+    sudo find /var/log \( -name '*.gz' -o -name '*.0' -o -name '*.1' \) -exec rm -rf {} \;
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error..."
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nDeleting archived logs!"
                         fi
 }
 
 REMOVE() {
-	echo "#Removing unneeded packages..."
-	sleep 2
-			sudo apt-get autoremove -y 
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+    echo "#Removing unneeded packages..."
+    sleep 2
+            sudo apt-get autoremove -y 
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error..."
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nRemoving unneeded packages!"
                         fi
 }
 
 RCONFIG() {
-	echo "#Removing residual configuration files..."
-	sleep 1
-			sudo dpkg --purge `dpkg --get-selections | grep deinstall | cut -f1` 
-			if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+    echo "#Removing residual configuration files..."
+    sleep 1
+            sudo dpkg --purge `dpkg -l | grep '^rc' | awk '{print $2}'` 
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error..."
-					sleep 2
+                    sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nRemoving residual configuration files!"
                         fi
@@ -107,74 +112,74 @@ test_4=(` grep "x-scheme-handler/https" $file`)
 
 hash firefox 2>/dev/null
 if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
-	if [ "${test_1[0]}" = "application/xhtml+xml=firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=firefox.desktop;" ]; then
-        	firefox=("TRUE" "Firefox" "default" "Firefox is currently your default web browser" )
-	else
-		firefox=("FALSE" "Firefox" "not default" "Set firefox as the default web browser" )
-	fi
+    if [ "${test_1[0]}" = "application/xhtml+xml=firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=firefox.desktop;" ]; then
+            firefox=("TRUE" "Firefox" "default" "Firefox is currently your default web browser" )
+    else
+        firefox=("FALSE" "Firefox" "not default" "Set firefox as the default web browser" )
+    fi
 else 
-	firefox=()
+    firefox=()
 fi
 
 hash chromium-browser 2>/dev/null
 if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
-	if [ "${test_1[0]}" = "application/xhtml+xml=chromium-browser.desktop;firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=chromium-browser.desktop;firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=chromium-browser.desktop;firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=chromium-browser.desktop;firefox.desktop;" ]; then
-		chromium=("TRUE" "Chromium" "default" "Chromium is currently your default web browser" )
-	else
-		chromium=("FALSE" "Chromium" "not default" "Set Chromium as the default web browser" )
-	fi
+    if [ "${test_1[0]}" = "application/xhtml+xml=chromium-browser.desktop;firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=chromium-browser.desktop;firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=chromium-browser.desktop;firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=chromium-browser.desktop;firefox.desktop;" ]; then
+        chromium=("TRUE" "Chromium" "default" "Chromium is currently your default web browser" )
+    else
+        chromium=("FALSE" "Chromium" "not default" "Set Chromium as the default web browser" )
+    fi
 else
-	chromium=()
+    chromium=()
 fi
 
 hash midori 2>/dev/null
 if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
-	if [ "${test_1[0]}" = "application/xhtml+xml=midori.desktop;firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=midori.desktop;firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=midori.desktop;firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=midori.desktop;firefox.desktop;" ]; then
-		midori=("TRUE" "Midori" "default" "Midori is currently your default web browser" )
-	else
-		midori=("FALSE" "Midori" "not default" "Set Midori as the default web browser" )
-	fi
+    if [ "${test_1[0]}" = "application/xhtml+xml=midori.desktop;firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=midori.desktop;firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=midori.desktop;firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=midori.desktop;firefox.desktop;" ]; then
+        midori=("TRUE" "Midori" "default" "Midori is currently your default web browser" )
+    else
+        midori=("FALSE" "Midori" "not default" "Set Midori as the default web browser" )
+    fi
 else
-	midori=()
+    midori=()
 fi
 
 hash google-chrome 2>/dev/null
 if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
-	if [ "${test_1[0]}" = "application/xhtml+xml=google-chrome.desktop;firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=google-chrome.desktop;firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=google-chrome.desktop;firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=google-chrome.desktop;firefox.desktop;" ]; then
-		googlechrome=("TRUE" "Google Chrome" "default" "Google Chrome is currently your default web browser" )
-	else
-		googlechrome=("FALSE" "Google Chrome" "not default" "Set Google Chrome as the default web browser" )
-	fi
+    if [ "${test_1[0]}" = "application/xhtml+xml=google-chrome.desktop;firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=google-chrome.desktop;firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=google-chrome.desktop;firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=google-chrome.desktop;firefox.desktop;" ]; then
+        googlechrome=("TRUE" "Google Chrome" "default" "Google Chrome is currently your default web browser" )
+    else
+        googlechrome=("FALSE" "Google Chrome" "not default" "Set Google Chrome as the default web browser" )
+    fi
 else
-	googlechrome=()
+    googlechrome=()
 fi
 
-		selection=$(zenity --window-icon="$ic" --list --radiolist --width=650 --height=200 --column="Select" --column="Name" --column="Status" \
-		--column="Description" --text="Select the web browser you wish to set as default." --title="Choose default browser" --ok-label="Set" --cancel-label="Cancel" \
-		"${firefox[@]}" "${googlechrome[@]}" "${chromium[@]}" "${midori[@]}" )
-		
-		# "The kill switch"
-		 if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-			return
-		fi
-	case "$selection" in
-	"Firefox") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=firefox.desktop;!g" /etc/gnome/defaults.list `;
-		   `sed -i "s!^"${test_2[0]}"!text/html=firefox.desktop;!g" /etc/gnome/defaults.list `; \
-		   `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=firefox.desktop;!g" /etc/gnome/defaults.list `; \
-		   `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=firefox.desktop;!g" /etc/gnome/defaults.list `;;
-	"Google Chrome") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
-	   `sed -i "s!^"${test_2[0]}"!text/html=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
-	   `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
-	   `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `;;
-	"Chromium") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
-	   `sed -i "s!^"${test_2[0]}"!text/html=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
-	   `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
-	   `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `;;
-	"Midori") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
-	   `sed -i "s!^"${test_2[0]}"!text/html=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
-	   `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
-	   `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `;;
-	esac
+        selection=$(zenity --window-icon="$ic" --list --radiolist --width=650 --height=200 --column="Select" --column="Name" --column="Status" \
+        --column="Description" --text="Select the web browser you wish to set as default." --title="Choose default browser" --ok-label="Set" --cancel-label="Cancel" \
+        "${firefox[@]}" "${googlechrome[@]}" "${chromium[@]}" "${midori[@]}" )
+        
+        # "The kill switch"
+         if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+            return
+        fi
+    case "$selection" in
+    "Firefox") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=firefox.desktop;!g" /etc/gnome/defaults.list `;
+           `sed -i "s!^"${test_2[0]}"!text/html=firefox.desktop;!g" /etc/gnome/defaults.list `; \
+           `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=firefox.desktop;!g" /etc/gnome/defaults.list `; \
+           `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=firefox.desktop;!g" /etc/gnome/defaults.list `;;
+    "Google Chrome") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+       `sed -i "s!^"${test_2[0]}"!text/html=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+       `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+       `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=google-chrome.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `;;
+    "Chromium") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+       `sed -i "s!^"${test_2[0]}"!text/html=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+       `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+       `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=chromium-browser.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `;;
+    "Midori") `sed -i "s!^"${test_1[0]}"!application/xhtml+xml=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+       `sed -i "s!^"${test_2[0]}"!text/html=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+       `sed -i "s!^"${test_3[0]}"!x-scheme-handler/http=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `; \
+       `sed -i "s!^"${test_4[0]}"!x-scheme-handler/https=midori.desktop;firefox.desktop;!g" /etc/gnome/defaults.list `;;
+    esac
 unset file
 }
 
@@ -317,35 +322,48 @@ zenity --question --title="$APPNAME"  --text="Do you want to proceed? You are ab
 
 PROCEED=$(zenity --info --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --width=270 --text="The cleaner has finished."; echo $?)
 if [ ${PROCEED} -eq 1 ]; then
-	zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
-	return
+    zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
+    return
 else
-	return
+    return
 fi
 }
 
-	x=0
-	for k in "${!ARRAYC[@]}"; do  x=$(( $x + 1 )); done  # Get the total number of selected items in the array
+FIXBOOTUP() {
+    echo "#Fixing the bootup..."
+sudo sed -i "s/Ubuntu 14.04/Linux Lite 2.2/;s/black=0x2c001e/black=0x000000/;s/white=0xffffff/white=0xffffff/;s/brown=0xff4012/brown=0xffff00/;s/blue=0x988592/blue=0x000000/" /lib/plymouth/themes/ubuntu-text/ubuntu-text.plymouth && sudo update-initramfs -u
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+                    sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nFixing the bootup!"
+                        fi
+echo 'Linux Lite 2.2 LTS \n \l' | sudo tee /etc/issue
+sudo sed -i 's/^DISTRIB_DESCRIPTION=.*$/DISTRIB_DESCRIPTION=Linux Lite 2.2/g' /etc/lsb-release
+}
 
-	TOTAL_LINES=$x
+    x=0
+    for k in "${!ARRAYC[@]}"; do  x=$(( $x + 1 )); done  # Get the total number of selected items in the array
 
-	printf '%s \n' "${ARRAYC[@]}"|
-	while read  line
-		do
-			eval $line     # Execute functions one by one
-			if [ $? = 1 ]; then
-				zenity --info --title="Lite Tweak" --text="Error:\n${line}"
-			fi	
-		let i++
-		 (( PERCENTAGE = 100 \* ${i} / ${TOTAL_LINES} ))
-		 echo "$PERCENTAGE"
+    TOTAL_LINES=$x
 
-		if [ "$PERCENTAGE" == "100" ]; then
-			echo "#Done"
-			sleep 2
-		fi
-	
-	done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300 --no-cancel
+    printf '%s \n' "${ARRAYC[@]}"|
+    while read  line
+        do
+            $line     # Execute functions one by one
+            if [ $? = 1 ]; then
+                zenity --info --title="Lite Tweak" --text="Error:\n${line}"
+            fi    
+        let i++
+         (( PERCENTAGE = 100 \* ${i} / ${TOTAL_LINES} ))
+         echo "$PERCENTAGE"
+
+        if [ "$PERCENTAGE" == "100" ]; then
+            echo "#Done"
+            sleep 2
+        fi
+    
+    done| zenity --progress  --title="Lite Tweaks" --auto-kill --auto-close --width=300 --no-cancel
 
 unset ARAYC
 unset FRM
