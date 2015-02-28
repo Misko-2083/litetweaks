@@ -92,7 +92,7 @@ TMP_DU=$(mktemp /tmp/diskusage.XXXXX)
 df -h -T| tail -n+2 | while read fs type size used rest target; do
     if [[ $rest ]] ; then
         echo ${fs} ${type} ${size}B ${used}B ${rest}B ${target} |grep /dev/sd |
-    awk '{print $1,"\n",$2,"\n",$3,"\n",$4,"\n",$5,"\n",$6}BEGIN{ s = 7; e = 35; }{for (i=s; i<=e; i++) printf("%s%s", $(i), i<e ? OFS : "\n"); }' #Workaround for disk labels that contain whitespaces(number of characters that can be divided by whitespace =e-s)
+    awk '{print $1,"\n",$2,"\n",$3,"\n",$4,"\n",$5,"\n",$6}BEGIN{ s = 7; e = 35; }{for (i=s; i<=e; i++) printf("%s%s", $(i), i<e ? OFS : "\n"); }' # Workaround for disk labels that contain whitespaces(number of characters that can be divided by whitespace =e-s)
     fi
 done |sed -e 's/[ \t]*$//' $1|  tee $TMP_DU 
 
@@ -312,7 +312,7 @@ fi
 LL_VERSION=$(awk '{print $3}' /etc/llver)
 case $LL_VERSION in
 2.0)fixbootup=() ;;
-2.2)fixbootup=(FALSE "Bootup Fix" "Fix" "Repair" "Safe" "Fix the bootup" ) ;;
+2.2)fixbootup=(FALSE "Bootup Fix" "Fix" "Repair" "Safe" "Fix the bootup - restore default splash screen, restore System information" ) ;;
 2.4)fixbootup=() ;;
 esac
 }
@@ -320,7 +320,7 @@ esac
 #Main loop
 while (true); do
 
-CHECK        # first run the checks
+CHECK        # First run the checks
 
 # Main zenity dialogue window
 selection=$(zenity --window-icon="$ic" --list --checklist --width=880 --height=500 --column="Select" --column="Name" --column="Task" --column="Category" --column="Status" \
@@ -352,7 +352,7 @@ if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info --title='Lite Tweaks' --text='No option was selected.'
 fi
 
-ARRAYS   #Separate selected items into array A and aray B
+ARRAYS   # Separate selected items into array A and array B
 RUN
 done
 

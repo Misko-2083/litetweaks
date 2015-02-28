@@ -115,7 +115,7 @@ if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
     if [ "${test_1[0]}" = "application/xhtml+xml=firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=firefox.desktop;" ]; then
             firefox=("TRUE" "Firefox" "default" "Firefox is currently your default web browser" )
     else
-        firefox=("FALSE" "Firefox" "not default" "Set firefox as the default web browser" )
+        firefox=("FALSE" "Firefox" "not default" "Set Firefox as the default web browser" )
     fi
 else 
     firefox=()
@@ -330,7 +330,7 @@ fi
 }
 
 FIXBOOTUP() {
-    echo "#Fixing the bootup..."
+    echo "#Fixing the bootup, this may take a while..."
 sudo sed -i "s/Ubuntu 14.04/Linux Lite 2.2/;s/black=0x2c001e/black=0x000000/;s/white=0xffffff/white=0xffffff/;s/brown=0xff4012/brown=0xffff00/;s/blue=0x988592/blue=0x000000/" /lib/plymouth/themes/ubuntu-text/ubuntu-text.plymouth && sudo update-initramfs -u
             if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
