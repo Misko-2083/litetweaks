@@ -96,7 +96,7 @@ df -h -T| tail -n+2 | while read fs type size used rest target; do
     fi
 done |sed -e 's/[ \t]*$//' $1|  tee $TMP_DU 
 
-SEL=$(cat $TMP_DU | zenity --list --width=600 --height=350 --title="${DU_TITLE}" --text="${DU_TEXT}" --column="Device" --column="Filesystem" --column="Size" --column="Used" --column="Free" --column="%Used" --column="Partition" --print-column="7" "${DFARRAY[@]}")
+SEL=$(cat $TMP_DU | zenity --list --width=600 --height=350 --title="${DU_TITLE}" --text="${DU_TEXT}" --column="Device" --column="Filesystem" --column="Size" --column="Used" --column="Free" --column="%Used" --column="Partition" --separator="" --print-column="7" "${DFARRAY[@]}")
 
 if [ -z "$SEL" ]; then
 rm -f $TMP_DU

@@ -339,7 +339,7 @@ sudo sed -i "s/Ubuntu 14.04/Linux Lite 2.2/;s/black=0x2c001e/black=0x000000/;s/w
                                         --title="Error" --text="There was an error while\nFixing the bootup!"
                         fi
 echo 'Linux Lite 2.2 LTS \n \l' | sudo tee /etc/issue
-sudo sed -i 's/^DISTRIB_DESCRIPTION=.*$/DISTRIB_DESCRIPTION=Linux Lite 2.2/g' /etc/lsb-release
+sudo sed -i 's/^DISTRIB_DESCRIPTION=.*$/DISTRIB_DESCRIPTION="Linux Lite 2.2"/g' /etc/lsb-release
 }
 
     x=0
