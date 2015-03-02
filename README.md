@@ -5,4 +5,4 @@ Authors - [Jerry Bezencon,](https://github.com/linuxlite/) [Misko-2083,](https:/
 
 A collection of tools to tweak your Linux Lite system.
 
-![](http://i.imgur.com/GTLdzXx.png)
+![](http://i.imgur.com/LcM46nC.png)
