@@ -1,10 +1,10 @@
 #! /bin/bash
 #--------------------------------------------------------------------------------------------------------
 # Name: Lite Tweaks Super
-# Version: 1.0-0210
+# Version: 1.0-0220
 # Description: A collection of tools to tweak your Linux Lite system.
 # Authors: Misko_2083, John Jenkins, Jerry Bezencon
-# Date: February 25th, 2015
+# Date: March 2nd, 2015
 # Website: https://www.linuxliteos.com
 #--------------------------------------------------------------------------------------------------------
 
@@ -52,6 +52,11 @@ if [ $? = 0 ];then
 ARRAYC+=('FIXBOOTUP')
 fi
 
+echo $FRM | grep "FIXAPT" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('FIXAPT')
+fi
+
 CLEAN() {
 echo "#Cleaning the package cache..."
 sleep 2
@@ -77,7 +82,7 @@ sleep 2
 }
 
 REMOVE() {
-    echo "#Removing unneeded packages..."
+    echo "#Removing unneeded packages, please wait..."
     sleep 2
             sudo apt-get autoremove -y 
             if [ "${PIPESTATUS[0]}" -ne "0" ]; then
@@ -115,7 +120,7 @@ if [ "${PIPESTATUS[0]}" -eq "0"  ]; then
     if [ "${test_1[0]}" = "application/xhtml+xml=firefox.desktop;" ] && [ "${test_2[0]}" = "text/html=firefox.desktop;" ] && [ "${test_3[0]}" = "x-scheme-handler/http=firefox.desktop;" ] && [ "${test_4[0]}" = "x-scheme-handler/https=firefox.desktop;" ]; then
             firefox=("TRUE" "Firefox" "default" "Firefox is currently your default web browser" )
     else
-        firefox=("FALSE" "Firefox" "not default" "Set Firefox as the default web browser" )
+        firefox=("FALSE" "Firefox" "not default" "Set firefox as the default web browser" )
     fi
 else 
     firefox=()
@@ -330,7 +335,7 @@ fi
 }
 
 FIXBOOTUP() {
-    echo "#Fixing the bootup, this may take a while..."
+    echo "#Fixing the bootup, this might take a while..."
 sudo sed -i "s/Ubuntu 14.04/Linux Lite 2.2/;s/black=0x2c001e/black=0x000000/;s/white=0xffffff/white=0xffffff/;s/brown=0xff4012/brown=0xffff00/;s/blue=0x988592/blue=0x000000/" /lib/plymouth/themes/ubuntu-text/ubuntu-text.plymouth && sudo update-initramfs -u
             if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
@@ -340,6 +345,49 @@ sudo sed -i "s/Ubuntu 14.04/Linux Lite 2.2/;s/black=0x2c001e/black=0x000000/;s/w
                         fi
 echo 'Linux Lite 2.2 LTS \n \l' | sudo tee /etc/issue
 sudo sed -i 's/^DISTRIB_DESCRIPTION=.*$/DISTRIB_DESCRIPTION="Linux Lite 2.2"/g' /etc/lsb-release
+}
+
+FIXAPT() {
+    echo "#Stage 1: Repairing the package system."$"\nPlease wait, this might take some time..."
+sudo apt-get clean
+cd /var/lib/apt
+sudo mv lists lists.old
+sudo mkdir -p lists/partial
+sudo apt-get clean
+sudo apt-get update
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+                    sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nFetching package lists!"
+                    return
+                        fi
+    echo "#Stage 2: Repairing the package system."$"\nPlease wait, this might take some time..."
+
+sudo apt-get install -f
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+                    sleep 2
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nInstalling partialy installed packages!"
+                    return
+                        fi
+    echo "#Stage 3: Repairing the package system."$"\nPlease wait, this might take some time..."
+
+# Check for /etc/apt/sources.list.save file.If the file is not present then run...
+if [ !  -f /etc/apt/sources.list.save ]; then
+    sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+    sudo touch /etc/apt/sources.list
+    sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
+fi
+
+sudo rm /etc/apt/sources.list
+sudo cp /etc/apt/sources.list.save /etc/apt/sources.list
+sudo apt-get update
+
+    echo "#Final Stage: Repairing the package system."$"\nCompleting Repair..."
+
+sudo dpkg --configure -a
 }
 
     x=0

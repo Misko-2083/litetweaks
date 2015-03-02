@@ -1,15 +1,15 @@
 #! /bin/bash
 #--------------------------------------------------------------------------------------------------------
 # Name: Lite Tweaks
-# Version: 1.0-0210
+# Version: 1.0-0220
 # Description: A collection of tools to tweak your Linux Lite system.
 # Authors: Misko_2083, John Jenkins, Jerry Bezencon
-# Date: February 25th, 2015
+# Date: March 2nd, 2015
 # Website: https://www.linuxliteos.com
 #--------------------------------------------------------------------------------------------------------
 
 # Set functions for non-root execution
-# The ones that need root go to the other file: lite-software-super
+# The ones that need root go to the other file: lite-tweaks-super
 FIREFOX() {
     echo "#Removing the Firefox cache..."
               rm -rf $HOME/.cache/mozilla/
@@ -90,20 +90,20 @@ DU_TITLE="Disk Usage"
 TMP_DU=$(mktemp /tmp/diskusage.XXXXX)
 
 df -h -T| tail -n+2 | while read fs type size used rest target; do
-    if [[ $rest ]] ; then
-        echo ${fs} ${type} ${size}B ${used}B ${rest}B ${target} |grep /dev/sd |
-    awk '{print $1,"\n",$2,"\n",$3,"\n",$4,"\n",$5,"\n",$6}BEGIN{ s = 7; e = 35; }{for (i=s; i<=e; i++) printf("%s%s", $(i), i<e ? OFS : "\n"); }' # Workaround for disk labels that contain whitespaces(number of characters that can be divided by whitespace =e-s)
+	if [[ $rest ]] ; then
+		echo "$fs" "$type" "$size"B "$used"B "$rest"B "${target[@]}" |grep /dev/sd |
+		awk '{print $1,"\n",$2,"\n",$3,"\n",$4,"\n",$5,"\n",$6}BEGIN{ s = 7; e = 35; }{for (i=s; i<=e; i++) printf("%s%s", $(i), i<e ? OFS : "\n"); }' # Workaround for disk labels that contain whitespaces(number of characters that can be divided by whitespace =e-s)
     fi
-done |sed -e 's/[ \t]*$//' $1|  tee $TMP_DU 
+done | sed -e 's/[ \t]*$//' $1|  tee $TMP_DU 
 
-SEL=$(cat $TMP_DU | zenity --list --width=600 --height=350 --title="${DU_TITLE}" --text="${DU_TEXT}" --column="Device" --column="Filesystem" --column="Size" --column="Used" --column="Free" --column="%Used" --column="Partition" --separator="" --print-column="7" "${DFARRAY[@]}")
+SEL=$(cat $TMP_DU | zenity --list --width=600 --height=350 --title="${DU_TITLE}" --text="${DU_TEXT}" --column="Device" --column="Filesystem" --column="Size" --column="Used" --column="Free" --column="%Used" --column="Partition" --print-column="7"| cut -d '|' -f2)
 
 if [ -z "$SEL" ]; then
 rm -f $TMP_DU
 return
 fi
 
-thunar "$SEL"
+thunar "$(echo $SEL)"
 rm -f $TMP_DU
 }
 
@@ -190,6 +190,11 @@ echo $selection | grep "Bootup Fix" > /dev/null
 if [ $? = 0 ];then
 ARRAYB+=('FIXBOOTUP')
 fi
+
+echo $selection | grep "Package System Repair" > /dev/null
+if [ $? = 0 ];then
+ARRAYB+=('FIXAPT')
+fi
 }
 
 RUN() {
@@ -228,7 +233,7 @@ if [ ${#ARRAYB[@]} -ne 0 ]; then
     gksudo /usr/bin/lite-tweaks-super "${ARRAYB[@]}"      # Open the next file with superuser privileges and pass the array B
 fi
 
-if zenity --question --title="Lite Tweaks" --text="Process(s) complete.\nWould you like to continue using Lite-Tweaks?"; then
+if zenity --question --title="Lite Tweaks" --text="Process(s) complete.\nWould you like to continue using Lite Tweaks?"; then
     return
 else
     exit 0
@@ -312,30 +317,31 @@ fi
 LL_VERSION=$(awk '{print $3}' /etc/llver)
 case $LL_VERSION in
 2.0)fixbootup=() ;;
-2.2)fixbootup=(FALSE "Bootup Fix" "Fix" "Repair" "Safe" "Fix the bootup - restore default splash screen, restore System information" ) ;;
+2.2)fixbootup=(FALSE "Bootup Fix" "Fix" "Repair" "Caution" "Restore the boot splash to Linux Lite" ) ;;
 2.4)fixbootup=() ;;
 esac
 }
 
-#Main loop
+# Main loop
 while (true); do
 
-CHECK        # First run the checks
+CHECK        # first run the checks
 
 # Main zenity dialogue window
-selection=$(zenity --window-icon="$ic" --list --checklist --width=880 --height=500 --column="Select" --column="Name" --column="Task" --column="Category" --column="Status" \
- --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, read the warning on the proceeding step.\n\nYou can select multiple tasks to perform (password required for some tasks).' --title="Lite Tweaks" --ok-label="Begin" --cancel-label="Quit" \
+selection=$(zenity --window-icon="$ic" --list --checklist --width=880 --height=580 --column="Select" --column="Name" --column="Task" --column="Category" --column="Status" \
+ --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, involves altering system files.\n\nYou can select multiple tasks to perform (password required for some tasks).' --title="Lite Tweaks" --ok-label="Begin" --cancel-label="Quit" \
 FALSE "Autoremove Packages" "Clean" "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
+"${fixbootup[@]}" \
 "${chrome[@]}" \
 "${chromium[@]}" \
 FALSE "Default Web Browser" "Preferred" "Browser" "Safe" "Set your default web browser" \
-FALSE "Display Disk Usage" "Information" "System" "safe" "Display overall disk usage information" \
+FALSE "Display Disk Usage" "Information" "System" "Safe" "Display overall disk usage information for all partitions" \
 "${firefox[@]}" \
-"${fixbootup[@]}" \
 FALSE "Kernel Removal" "Clean" "System" "Caution" "Remove kernels you no longer wish to boot from" \
 FALSE "Locate Large Files" "Information" "System" "Caution" "Find files on your system within a size range" \
 "${logarchive[@]}" \
 "${aptcache[@]}" \
+FALSE "Package System Repair" "Fix" "Repair" "Caution" "Restore the package management system to default" \
 "${resconfig[@]}" \
 "${thumbn[@]}" \
 "${trash[@]}" \
@@ -352,7 +358,7 @@ if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info --title='Lite Tweaks' --text='No option was selected.'
 fi
 
-ARRAYS   # Separate selected items into array A and array B
+ARRAYS   #Separate selected items into arrays A and array B
 RUN
 done
 
