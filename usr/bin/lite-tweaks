@@ -90,9 +90,9 @@ DU_TITLE="Disk Usage"
 TMP_DU=$(mktemp /tmp/diskusage.XXXXX)
 
 df -h -T| tail -n+2 | while read fs type size used rest target; do
-	if [[ $rest ]] ; then
-		echo "$fs" "$type" "$size"B "$used"B "$rest"B "${target[@]}" |grep /dev/sd |
-		awk '{print $1,"\n",$2,"\n",$3,"\n",$4,"\n",$5,"\n",$6}BEGIN{ s = 7; e = 35; }{for (i=s; i<=e; i++) printf("%s%s", $(i), i<e ? OFS : "\n"); }' # Workaround for disk labels that contain whitespaces(number of characters that can be divided by whitespace =e-s)
+    if [[ $rest ]] ; then
+        echo "$fs" "$type" "$size"B "$used"B "$rest"B "${target[@]}" |grep /dev/sd |
+        awk '{print $1,"\n",$2,"\n",$3,"\n",$4,"\n",$5,"\n",$6}BEGIN{ s = 7; e = 35; }{for (i=s; i<=e; i++) printf("%s%s", $(i), i<e ? OFS : "\n"); }' # Workaround for disk labels that contain whitespaces(number of characters that can be divided by whitespace =e-s)
     fi
 done | sed -e 's/[ \t]*$//' $1|  tee $TMP_DU 
 
@@ -286,7 +286,7 @@ if [ ! -z  "$(dpkg -l | grep '^rc')"  ]; then
         RESCONFIGQTY=$(dpkg -l | grep '^rc' | awk '{print $2}'| wc -w)
     resconfig=(FALSE "Residual Config Files" "Clean" "Packages" "Safe" "You currently have $RESCONFIGQTY residual configuration files you can remove" )
 else
-        resconfig=( FALSE "Residual Config Files" "Clean" "Packages" "Safe" "There are no residual configuration files that can be removed" ) 
+        resconfig=() 
 fi
 
 # Check if any thumbnails exist
@@ -312,14 +312,6 @@ if [  "$(ls -A $HOME/.local/share/Trash/files/)" ]; then
 else
         trash=() 
 fi
-
-# Check LL version
-LL_VERSION=$(awk '{print $3}' /etc/llver)
-case $LL_VERSION in
-2.0)fixbootup=() ;;
-2.2)fixbootup=(FALSE "Bootup Fix" "Fix" "Repair" "Caution" "Restore the boot splash to Linux Lite" ) ;;
-2.4)fixbootup=() ;;
-esac
 }
 
 # Main loop
@@ -331,7 +323,7 @@ CHECK        # first run the checks
 selection=$(zenity --window-icon="$ic" --list --checklist --width=880 --height=580 --column="Select" --column="Name" --column="Task" --column="Category" --column="Status" \
  --column="Description" --text='Select the task you wish to perform, then click the Begin button. Sort Categories by clicking on the column.\n\nThere are 2 levels of <b>Status</b>:\n<span foreground="green">Safe</span> - Safe to perform, no harm can be done.\n<span foreground="red">Caution</span> - Proceed with caution, involves altering system files.\n\nYou can select multiple tasks to perform (password required for some tasks).' --title="Lite Tweaks" --ok-label="Begin" --cancel-label="Quit" \
 FALSE "Autoremove Packages" "Clean" "Packages" "Safe" "Remove packages installed for programs that are no longer present" \
-"${fixbootup[@]}" \
+FALSE "Bootup Fix" "Fix" "Repair" "Caution" "Restore the boot splash to Linux Lite" \
 "${chrome[@]}" \
 "${chromium[@]}" \
 FALSE "Default Web Browser" "Preferred" "Browser" "Safe" "Set your default web browser" \
