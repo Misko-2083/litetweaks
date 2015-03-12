@@ -336,15 +336,75 @@ fi
 
 FIXBOOTUP() {
     echo "#Fixing the bootup, this might take a while..."
-sudo sed -i "s/Ubuntu 14.04/Linux Lite 2.2/;s/black=0x2c001e/black=0x000000/;s/white=0xffffff/white=0xffffff/;s/brown=0xff4012/brown=0xffff00/;s/blue=0x988592/blue=0x000000/" /lib/plymouth/themes/ubuntu-text/ubuntu-text.plymouth && sudo update-initramfs -u
+# Check LL version
+LL_VERSION=$(awk '{print $3}' /etc/llver 2>/dev/null|| echo "Unknown")
+case $LL_VERSION in
+2.0)
+title="Linux Lite 2.0"
+black=
+white=
+brown=
+blue=
+;;
+2.2)
+title="Linux Lite 2.2"
+black="0x000000"
+white="0xffffff"
+brown="0xffff00"
+blue="0x000000"
+;;
+2.4)
+title="Linux Lite 2.4"
+black=
+white=
+brown=
+blue=
+;;
+Unknown)
+zenity --info --title="Bootup fix" --text="Unknown OS"
+return
+;;
+*)
+zenity --info --title="Lite Tweaks" --text="Bootup fix\nRelease not supported!"
+return
+;;
+esac
+
+sudo sed -i "s/^title=.*$/title=$title/;s/^black=.*$/black=$black/;s/white=.*$/white=$white/;s/^brown=.*$/brown=$brown/;s/^blue=.*$/blue=$blue/" /lib/plymouth/themes/ubuntu-text/ubuntu-text.plymouth
             if [ "${PIPESTATUS[0]}" -ne "0" ]; then
                         echo "#Error"
-                    sleep 2
+                    sleep 1
                                         zenity --error \
-                                        --title="Error" --text="There was an error while\nFixing the bootup!"
+                                        --title="Error" --text="There was an error while\nFixing the bootup!\nUnable to write to /etc/lsb-release"
+                    return
                         fi
-echo 'Linux Lite 2.2 LTS \n \l' | sudo tee /etc/issue
-sudo sed -i 's/^DISTRIB_DESCRIPTION=.*$/DISTRIB_DESCRIPTION="Linux Lite 2.2"/g' /etc/lsb-release
+
+ sudo update-initramfs -u
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+                    sleep 1
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nFixing the bootup!\nStatus: update-initramfs fail."
+                    return
+                        fi
+
+echo "Linux Lite $LL_VERSION LTS \n \l" | sudo tee /etc/issue
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+                    sleep 1
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nFixing the bootup!\nUnable to write to /etc/issue"
+                    return
+                        fi
+
+sudo sed -i 's/^DISTRIB_DESCRIPTION=.*$/DISTRIB_DESCRIPTION="Linux Lite '"$LL_VERSION"'"/g' /etc/lsb-release
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                        echo "#Error"
+                    sleep 1
+                                        zenity --error \
+                                        --title="Error" --text="There was an error while\nFixing the bootup!\nUnable to write to /etc/lsb-release"
+                    return
+                        fi
 }
 
 FIXAPT() {
