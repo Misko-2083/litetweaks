@@ -131,6 +131,11 @@ if [ $? = 0 ];then
 ARRAYA+=('FIREFOX')
 fi
 
+echo $selection | grep "Hostname" > /dev/null
+if [ $? = 0 ];then
+ARRAYB+=('HOSTNAME')
+fi
+
 echo $selection | grep "Chrome" > /dev/null
 if [ $? = 0 ];then
 ARRAYA+=('CHROME')
@@ -329,6 +334,7 @@ FALSE "Bootup Fix" "Fix" "Repair" "Caution" "Restore the boot splash to Linux Li
 FALSE "Default Web Browser" "Preferred" "Browser" "Safe" "Set your default web browser" \
 FALSE "Display Disk Usage" "Information" "System" "Safe" "Display overall disk usage information for all partitions" \
 "${firefox[@]}" \
+FALSE "Hostname" "Edit" "System" "Caution" "Change your computer hostname (you MUST reboot after)" \
 FALSE "Kernel Removal" "Clean" "System" "Caution" "Remove kernels you no longer wish to boot from" \
 FALSE "Locate Large Files" "Information" "System" "Caution" "Find files on your system within a size range" \
 "${logarchive[@]}" \

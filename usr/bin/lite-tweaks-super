@@ -27,6 +27,11 @@ if [ $? = 0 ];then
 ARRAYC+=('BROWSER')
 fi
 
+echo $FRM | grep "HOSTNAME" > /dev/null
+if [ $? = 0 ];then
+ARRAYC+=('HNAME')
+fi
+
 echo $FRM| grep "FILESIZES" > /dev/null
 if [ $? = 0 ];then
 ARRAYC+=('FILES')
@@ -90,6 +95,20 @@ REMOVE() {
                     sleep 2
                                         zenity --error \
                                         --title="Error" --text="There was an error while\nRemoving unneeded packages!"
+                        fi
+}
+
+HNAME() {
+	hostn=$(zenity --entry --text "What hostname would you like?" --entry-text "localhost")
+	echo $hostn > /etc/hostname
+	sed -i '/127.0.1.1/c\127.0.1.1       '$hostn'' /etc/hosts
+	hostname $hostn
+        if [ "$HOSTNAME" = "$hostn" ]; then
+	zenity --info \
+	--title="Hostname changed" --text "New hostname set to:\n\n<b>"$hostn"<\b>\n\nYou MUST reboot now."
+	else
+	zenity --error \
+	--title="Error" --text "Hostname not changed. Exiting!"
                         fi
 }
 
