@@ -99,18 +99,30 @@ REMOVE() {
 }
 
 HNAME() {
-	hostn=$(zenity --entry --text "What hostname would you like?" --entry-text "localhost")
-	echo $hostn > /etc/hostname
-	sed -i '/127.0.1.1/c\127.0.1.1       '$hostn'' /etc/hosts
-	hostname $hostn
-        if [ "$HOSTNAME" = "$hostn" ]; then
-	zenity --info \
-	--title="Hostname changed" --text "New hostname set to:\n\n<b>"$hostn"<\b>\n\nYou MUST reboot now."
-	else
-	zenity --error \
-	--title="Error" --text "Hostname not changed. Exiting!"
-                        fi
+	current_hostname=$(cat /etc/hostname)
+
+	newhost=$(zenity --entry --title="Lite Tweaks: Hostname" --text="Your current hostname is:\n\n${current_hostname}\n\nEnter your new hostname or cancel." --entry-text="${current_hostname}")
+	
+            if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+                      return
+	    fi
+	
+	#If the user entered only blank spaces or starts with a hashtag, abort
+	echo "$newhost" | egrep "^[[:space:]]*$|^#" >/dev/null
+	if [ $? = 0 ]; then
+		zenity --warning \
+		--title="Hostname not changed" --text="Hostname can not be empty or start with a hash\nHostname hasn't been changed!"
+	 	return
+	fi
+	
+	sed -i "s/$current_hostname/$newhost/g" /etc/hosts
+	sed -i "s/$current_hostname/$newhost/g" /etc/hostname
+
+		zenity --info \
+		--title="Hostname changed" --text="New hostname set to:\n\n<b>$newhost</b>\n\nYou MUST reboot to apply the change."
+return
 }
+
 
 RCONFIG() {
     echo "#Removing residual configuration files..."
